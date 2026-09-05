@@ -2,328 +2,208 @@
 <html lang="pl">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Great Lakes Daily</title>
-
+<title>Emergency Alert — Chicago</title>
 <style>
-*{
-    margin:0;
-    padding:0;
-    box-sizing:border-box;
-}
-
-body{
-    font-family: Arial, Helvetica, sans-serif;
-    background:#f4f4f4;
-    color:#222;
-}
-
-.topbar{
-    background:#0b2c55;
-    color:white;
-    padding:10px 30px;
-    font-size:14px;
-}
-
-.header{
-    background:white;
-    padding:25px 30px;
-    border-bottom:1px solid #ddd;
-}
-
-.logo{
-    font-size:52px;
-    font-weight:900;
-    color:#163b6b;
-    letter-spacing:2px;
-}
-
-.tagline{
-    color:#666;
-    margin-top:5px;
-}
-
-.nav{
-    background:#103b6d;
-    padding:0 30px;
-}
-
-.nav ul{
+  :root{
+    --alert-red:#ff2d2d;
+    --alert-red-dark:#b30000;
+    --panel:#1c1c1e;
+    --text-hi:#ffffff;
+    --text-lo:rgba(255,255,255,0.72);
+  }
+  *{box-sizing:border-box; margin:0; padding:0;}
+  html,body{
+    height:100%;
+    background:#03040a;
     display:flex;
-    list-style:none;
-}
-
-.nav li{
-    color:white;
-    padding:16px 22px;
-    font-weight:bold;
-    cursor:pointer;
-}
-
-.nav li:hover{
-    background:#0a2b50;
-}
-
-.container{
-    max-width:1400px;
-    margin:25px auto;
-    display:grid;
-    grid-template-columns:2fr 1fr;
-    gap:25px;
-    padding:0 20px;
-}
-
-.main{
-    background:white;
-    padding:20px;
-}
-
-.sidebar{
-    background:white;
-    padding:20px;
-}
-
-.hero-image{
-    width:100%;
-    height:500px;
-    object-fit:cover;
-    display:block;
-}
-
-.category{
-    color:#1b4e89;
-    font-weight:bold;
-    margin-top:25px;
+    align-items:center;
+    justify-content:center;
+    font-family:-apple-system,BlinkMacSystemFont,"SF Pro Text","Segoe UI",Roboto,sans-serif;
+  }
+  .stage{
+    padding:48px 20px;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+  }
+  .wrap{
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+  }
+  .phone{
+    position:relative;
+    width:360px;
+    height:760px;
+    border-radius:52px;
+    background:#000;
+    box-shadow:
+      0 0 0 10px #0a0c10,
+      0 0 0 11px rgba(255,255,255,0.06),
+      0 40px 90px rgba(0,0,0,0.65);
+    overflow:hidden;
+    display:flex;
+    flex-direction:column;
+  }
+  .notch{
+    position:absolute; top:14px; left:50%; transform:translateX(-50%);
+    width:120px; height:26px; background:#000; border-radius:20px;
+    z-index:5;
+  }
+  .statusbar{
+    position:relative; z-index:4;
+    display:flex; justify-content:space-between; align-items:center;
+    padding:16px 26px 6px 26px;
+    font-size:13px; font-weight:600; color:var(--text-hi);
+  }
+ 
+  /* full-screen emergency takeover */
+  .takeover{
+    flex:1;
+    display:flex;
+    flex-direction:column;
+    background:
+      repeating-linear-gradient(135deg, var(--alert-red-dark) 0px, var(--alert-red-dark) 26px, var(--alert-red) 26px, var(--alert-red) 52px);
+    animation:pulse 1.1s ease-in-out infinite;
+  }
+  @keyframes pulse{
+    0%,100%{ filter:brightness(1); }
+    50%{ filter:brightness(1.18); }
+  }
+  .siren-row{
+    display:flex;
+    justify-content:center;
+    gap:8px;
+    padding:22px 0 4px 0;
+  }
+  .siren-bar{
+    width:5px;
+    height:16px;
+    border-radius:3px;
+    background:rgba(255,255,255,0.9);
+    animation:bounce 0.9s ease-in-out infinite;
+  }
+  .siren-bar:nth-child(1){animation-delay:0s;}
+  .siren-bar:nth-child(2){animation-delay:0.12s;}
+  .siren-bar:nth-child(3){animation-delay:0.24s;}
+  .siren-bar:nth-child(4){animation-delay:0.36s;}
+  .siren-bar:nth-child(5){animation-delay:0.48s;}
+  @keyframes bounce{
+    0%,100%{ height:10px; opacity:0.6; }
+    50%{ height:24px; opacity:1; }
+  }
+  .headline{
+    text-align:center;
+    color:var(--text-hi);
+    font-size:15px;
+    font-weight:800;
+    letter-spacing:0.6px;
     text-transform:uppercase;
-}
-
-.article-title{
-    font-size:54px;
-    margin:15px 0;
-    color:#163b6b;
-}
-
-.meta{
-    color:#777;
-    border-bottom:1px solid #ddd;
-    padding-bottom:15px;
-    margin-bottom:25px;
-}
-
-.article{
-    font-size:20px;
-    line-height:1.8;
-}
-
-.article p{
-    margin-bottom:25px;
-}
-
-.sidebar-title{
-    font-size:30px;
-    color:#163b6b;
-    margin-bottom:20px;
-}
-
-.headline{
-    padding:15px 0;
-    border-bottom:1px solid #ddd;
-}
-
-.headline h4{
-    margin-bottom:5px;
-}
-
-.headline span{
-    color:#777;
-    font-size:14px;
-}
-
-.weather{
-    margin-top:40px;
-    padding:20px;
-    background:#f5f7fa;
-}
-
-.weather-temp{
-    font-size:64px;
-    font-weight:bold;
-    color:#163b6b;
-}
-
-.footer{
-    background:#0b2c55;
-    color:white;
-    margin-top:40px;
-    padding:40px;
-}
-
-.footer-grid{
-    display:grid;
-    grid-template-columns:1fr 1fr 1fr;
-    gap:30px;
-    max-width:1400px;
-    margin:auto;
-}
+    margin-top:10px;
+  }
+ 
+  .sheet{
+    margin:18px 14px 0 14px;
+    background:var(--panel);
+    border-radius:18px;
+    padding:20px 18px 18px 18px;
+    box-shadow:0 10px 30px rgba(0,0,0,0.5);
+  }
+  .sheet-title{
+    color:var(--text-hi);
+    font-size:17px;
+    font-weight:700;
+    margin-bottom:10px;
+  }
+  .sheet-body{
+    color:var(--text-lo);
+    font-size:14.5px;
+    line-height:1.55;
+  }
+  .sheet-divider{
+    height:1px;
+    background:rgba(255,255,255,0.12);
+    margin:14px 0 12px 0;
+  }
+  .sheet-extra{
+    color:var(--text-hi);
+    font-size:14.5px;
+    line-height:1.55;
+  }
+ 
+  .ok-btn{
+    margin:16px 14px 0 14px;
+    background:rgba(255,255,255,0.14);
+    border:1px solid rgba(255,255,255,0.25);
+    color:var(--text-hi);
+    text-align:center;
+    padding:14px 0;
+    border-radius:14px;
+    font-size:16px;
+    font-weight:700;
+    letter-spacing:0.4px;
+  }
+ 
+  .footnote{
+    text-align:center;
+    color:rgba(255,255,255,0.75);
+    font-size:12px;
+    margin:12px 14px 0 14px;
+    line-height:1.4;
+  }
+ 
+  .home-indicator{
+    position:absolute; bottom:10px; left:50%; transform:translateX(-50%);
+    width:120px; height:5px; border-radius:3px;
+    background:rgba(255,255,255,0.7);
+    z-index:5;
+  }
+  .caption{
+    text-align:center;
+    color:rgba(245,246,248,0.35);
+    font-size:12.5px;
+    margin-top:22px;
+    letter-spacing:0.3px;
+  }
 </style>
 </head>
-
 <body>
-
-<div class="topbar">
-    Sunday, 23 November 2025 | 42°F | Lake Superior
-</div>
-
-<header class="header">
-    <div class="logo">GREAT LAKES DAILY</div>
-    <div class="tagline">LOCAL NEWS • OUR COMMUNITY • OUR LAKES</div>
-</header>
-
-<nav class="nav">
-    <ul>
-        <li>Local News</li>
-        <li>Weather</li>
-        <li>Community</li>
-        <li>Business</li>
-        <li>Sports</li>
-        <li>Opinion</li>
-    </ul>
-</nav>
-
-<div class="container">
-
-    <main class="main">
-
-        <img
-            src="motelek.png"
-            alt="Motel"
-            class="hero-image"
-        >
-
-        <div class="category">
-            Local News
+  <div class="stage">
+    <div class="wrap">
+      <div class="phone">
+        <div class="notch"></div>
+        <div class="statusbar">
+          <span>2:47 AM</span>
+          <span>Chicago, IL</span>
         </div>
-
-        <h1 class="article-title">
-            DOUBLE MURDER IN CAMPBELLSPORT. UNIMAGINABLE BRUTALITY SHOCKS THE COMMUNITY
-        </h1>
-
-        <div class="meta">
-            November 23 2025, Campbellsport, Wisconsin
-        </div>
-
-        <div class="article">
-
-            <p>
-                
-
-Residents of Campbellsport awoke today under the shadow of one of the most shocking crimes in the area's history. As a result of events that unfolded during the night of November 21–22, Sergeant Michael Harper and 27-year-old Elwira Kowalski, who had previously been reported missing, both lost their lives. <br>
-
-The Wisconsin State Police are investigating the case as a double homicide, the circumstances of which officials have described as “exceptionally brutal.”<br>	
-
-According to preliminary findings, Sergeant Harper was dispatched to a motel along US-45 following reports of a young woman who appeared disoriented and in need of assistance. It was the last confirmed contact the officer had with dispatch.<br>
-
-Several hours later, his body was discovered near Sandy Road.<br>
-
-A short distance away, investigators also found the body of Elwira Kowalski, who had disappeared several days earlier while returning home from work. Emergency responders at the scene pronounced her dead.<br><br>
-
-Although authorities have not released details from the autopsies, sources close to the investigation claim that the injuries sustained by both victims were among the most severe local law enforcement has encountered in many years.
-
-“There was no doubt that extreme violence had taken place,” said an anonymous officer involved in securing the scene.
-
-Residents reported seeing numerous police vehicles, forensic units, and emergency responders in the area, which remained cordoned off for several hours as investigators processed evidence.
-
-The investigation is being overseen by Commissioner Gabriel Tassoulis of the Wisconsin State Police.<br>
-
-“At this stage, we are examining every possible scenario. We cannot rule out the involvement of more than one individual. Our priority remains establishing exactly what happened and identifying those responsible for this tragedy,” Tassoulis stated during a press briefing.<br>
-
-Due to the severity of the violence involved, authorities have declined to release most details regarding the victims' injuries or the precise circumstances under which they were found.<br><br>
-
-Speculation about the perpetrator spread rapidly across social media. Some residents fear the crime may have been committed by an exceptionally dangerous offender operating within Fond du Lac County. Others have pointed to similarities with several unresolved incidents that have occurred along regional highways in recent years.<br>
-
-Authorities are urging the public to remain calm and refrain from spreading unverified information.<br><br>
-
-Flowers, candles, and handwritten messages have already appeared outside the Campbellsport Police Department in memory of Sergeant Harper. The family of Elwira Kowalski has asked the media and the public to respect their privacy during this difficult time.  <br>          </p>
-
-
-        </div>
-
-    </main>
-
-    <aside class="sidebar">
-
-        <h2 class="sidebar-title">
-            Latest Headlines
-        </h2>
-
-        <div class="headline">
-            <h4>Local road closure announced</h4>
-            <span>2 hours ago</span>
-        </div>
-
-        <div class="headline">
-            <h4>Storm expected over Lake Superior</h4>
-            <span>4 hours ago</span>
-        </div>
-
-        <div class="headline">
-            <h4>Community meeting draws crowd</h4>
-            <span>6 hours ago</span>
-        </div>
-
-        <div class="headline">
-            <h4>Triple murder in church house! Is the "Sandy Road Beast" real?</h4>
-            <span>8 hours ago</span>
-        </div>
-
-        <div class="weather">
-            <h3>Weather</h3>
-
-            <div class="weather-temp">
-                42°F
+ 
+        <div class="takeover">
+          <div class="siren-row">
+            <div class="siren-bar"></div>
+            <div class="siren-bar"></div>
+            <div class="siren-bar"></div>
+            <div class="siren-bar"></div>
+            <div class="siren-bar"></div>
+          </div>
+          <div class="headline">Alert kryzysowy</div>
+ 
+          <div class="sheet">
+            <div class="sheet-title">Alert o zagrożeniu</div>
+            <div class="sheet-body">
+              Pozostań w bezpiecznym miejscu. Zgłoszono wybuch w centrum Chicago. Unikaj obszaru w promieniu 500&nbsp;m od miejsca zdarzenia. Nie zbliżaj się do budynku. Czekaj na dalsze instrukcje.
             </div>
-
-            <p>
-                Partly Cloudy
-            </p>
+            <div class="sheet-divider"></div>
+            <div class="sheet-extra">Ogród zapomniał swojej Pani.<br>Ona o nim nie zapomniała.</div>
+          </div>
+ 
+          <div class="ok-btn">OK</div>
+          <div class="footnote">Aby wyciszyć alert, dotknij OK. Dźwięk będzie trwał do tego momentu.</div>
         </div>
-
-    </aside>
-
-</div>
-
-<footer class="footer">
-
-    <div class="footer-grid">
-
-        <div>
-            <h3>About</h3>
-            <br>
-            <p>
-                Great Lakes Daily is a regional news publication
-                covering communities throughout the Great Lakes area.
-            </p>
-        </div>
-
-        <div>
-            <h3>Contact</h3>
-            <br>
-            <p>
-                newsroom@greatlakesdaily.com
-            </p>
-        </div>
-
-        <div>
-            <h3>Newsletter</h3>
-            <br>
-            <p>
-                Subscribe for local updates and breaking news.
-            </p>
-        </div>
-
+ 
+        <div class="home-indicator"></div>
+      </div>
+      <div class="caption">alert wysłany jednocześnie do wszystkich telefonów w mieście — 2:47 AM</div>
     </div>
-
-</footer>
-
+  </div>
 </body>
 </html>
