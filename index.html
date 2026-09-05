@@ -2,6 +2,7 @@
 <html lang="pl">
 <head>
 <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover">
 <title>Emergency Alert — Chicago</title>
 <style>
   :root{
@@ -15,16 +16,18 @@
   html,body{
     height:100%;
     background:#03040a;
-    display:flex;
-    align-items:center;
-    justify-content:center;
     font-family:-apple-system,BlinkMacSystemFont,"SF Pro Text","Segoe UI",Roboto,sans-serif;
+    overflow:hidden;
   }
+ 
+  /* Na desktopie / dużym ekranie: pokaż makietę telefonu na środku.
+     Na realnym telefonie (max-width: 480px): wypełnij cały ekran. */
   .stage{
-    padding:48px 20px;
+    min-height:100dvh;
     display:flex;
     align-items:center;
     justify-content:center;
+    padding:48px 20px;
   }
   .wrap{
     display:flex;
@@ -126,78 +129,93 @@
     margin:14px 0 12px 0;
   }
   .sheet-extra{
-    position:relative;
     color:var(--text-hi);
     font-size:14.5px;
     line-height:1.55;
-    animation:glitch-skew 0.5s infinite steps(1), flicker 0.12s infinite steps(1);
-  }
-  .sheet-extra::before,
-  .sheet-extra::after{
-    content:"Ogród zapomniał swojej Pani.\A Ona o nim nie zapomniała.";
-    white-space:pre;
-    position:absolute;
-    left:0; top:0; right:0;
-    line-height:1.55;
-    background:var(--panel);
+    max-height:0;
+    opacity:0;
     overflow:hidden;
+    transition:max-height 0.4s ease, opacity 0.3s ease;
   }
-  .sheet-extra::before{
-    color:#ff2d55;
-    animation:glitch-1 0.5s infinite linear;
+  .sheet-extra.revealed{
+    max-height:200px;
+    opacity:1;
+  }
+ 
+  /* --- Glitch na fragmencie o Ogrodzie (intensywny) --- */
+  .glitch{
+    position:relative;
+    display:inline-block;
+    color:var(--text-hi);
+  }
+  .sheet-extra.glitching .glitch{
+    animation:glitch-jitter 1.8s infinite steps(1);
+  }
+  .glitch::before,
+  .glitch::after{
+    content:attr(data-text);
+    position:absolute;
+    left:0; top:0;
+    width:100%;
+    overflow:hidden;
+    background:transparent;
+    opacity:0;
+  }
+  .glitch::before{
+    color:#00e5ff;
     clip-path:inset(0 0 0 0);
+    transform:translate(0,0);
   }
-  .sheet-extra::after{
-    color:#2dd7ff;
-    animation:glitch-2 0.45s infinite linear;
+  .glitch::after{
+    color:#ff2d6a;
     clip-path:inset(0 0 0 0);
+    transform:translate(0,0);
   }
-  @keyframes flicker{
-    0%,100%{ opacity:1; }
-    38%{ opacity:1; }
-    39%{ opacity:0.3; }
-    40%{ opacity:1; }
-    63%{ opacity:1; }
-    64%{ opacity:0.15; }
-    66%{ opacity:1; }
+  .sheet-extra.glitching .glitch::before{
+    animation:glitch-slice-1 1.8s infinite linear;
   }
-  @keyframes glitch-skew{
-    0%, 40%, 100%{ transform:translate(0,0); }
-    8%{ transform:translate(-4px,1px); }
-    16%{ transform:translate(3px,-2px); }
-    24%{ transform:translate(-2px,2px); letter-spacing:1px; }
-    32%{ transform:translate(4px,0); letter-spacing:0; }
-    48%{ transform:translate(-3px,-1px); }
-    56%{ transform:translate(2px,1px); }
-    72%{ transform:translate(-5px,0); }
-    80%{ transform:translate(3px,2px); }
-    90%{ transform:translate(-2px,-1px); }
+  .sheet-extra.glitching .glitch::after{
+    animation:glitch-slice-2 1.8s infinite linear;
   }
-  @keyframes glitch-1{
-    0%, 100%{ opacity:0; clip-path:inset(0 0 100% 0); transform:translate(0,0); }
-    5%{ opacity:0.9; clip-path:inset(10% 0 60% 0); transform:translate(-6px,-2px); }
-    15%{ opacity:0; clip-path:inset(0 0 100% 0); }
-    30%{ opacity:0.9; clip-path:inset(55% 0 10% 0); transform:translate(6px,2px); }
-    38%{ opacity:0; }
-    50%{ opacity:0.9; clip-path:inset(20% 0 40% 0); transform:translate(-4px,0); }
-    58%{ opacity:0; }
-    70%{ opacity:0.9; clip-path:inset(35% 0 25% 0); transform:translate(5px,-1px); }
-    78%{ opacity:0; }
-    88%{ opacity:0.9; clip-path:inset(5% 0 70% 0); transform:translate(-3px,1px); }
-    95%{ opacity:0; }
+  @keyframes glitch-jitter{
+    0%,60%,100%{ transform:translate(0,0); opacity:1; }
+    61%{ transform:translate(-4px,1px); opacity:0.6; }
+    62%{ transform:translate(5px,-2px); opacity:1; }
+    63%{ transform:translate(-5px,2px); opacity:0.15; }
+    64%{ transform:translate(4px,-1px); opacity:1; }
+    65%{ transform:translate(-3px,1px); opacity:0.7; }
+    66%,74%{ transform:translate(0,0); opacity:1; }
+    75%{ transform:translate(6px,-3px); opacity:0.2; text-shadow:0 0 14px rgba(255,255,255,0.9); }
+    76%{ transform:translate(-6px,3px); opacity:1; }
+    77%{ transform:translate(0,-2px); opacity:0.4; }
+    78%,86%{ transform:translate(0,0); opacity:1; }
+    87%{ transform:translate(3px,0); opacity:0.5; }
+    88%{ transform:translate(-3px,1px); opacity:1; }
+    89%,100%{ transform:translate(0,0); opacity:1; }
   }
-  @keyframes glitch-2{
-    0%, 100%{ opacity:0; clip-path:inset(100% 0 0 0); transform:translate(0,0); }
-    6%{ opacity:0.9; clip-path:inset(60% 0 15% 0); transform:translate(5px,1px); }
-    14%{ opacity:0; }
-    28%{ opacity:0.9; clip-path:inset(15% 0 55% 0); transform:translate(-5px,-2px); }
-    36%{ opacity:0; }
-    52%{ opacity:0.9; clip-path:inset(40% 0 20% 0); transform:translate(4px,0); }
-    60%{ opacity:0; }
-    74%{ opacity:0.9; clip-path:inset(25% 0 45% 0); transform:translate(-4px,1px); }
-    82%{ opacity:0; }
-    92%{ opacity:0.9; clip-path:inset(65% 0 5% 0); transform:translate(3px,-1px); }
-    98%{ opacity:0; }
+  @keyframes glitch-slice-1{
+    0%,58%,100%{ clip-path:inset(0 0 0 0); transform:translate(0,0); opacity:0; }
+    59%{ clip-path:inset(8% 0 55% 0); transform:translate(-6px,0); opacity:0.9; }
+    60%{ clip-path:inset(65% 0 8% 0); transform:translate(6px,0); opacity:0.9; }
+    61%{ clip-path:inset(25% 0 45% 0); transform:translate(-5px,0); opacity:0.85; }
+    62%{ clip-path:inset(0 0 0 0); transform:translate(0,0); opacity:0; }
+    74%{ clip-path:inset(40% 0 15% 0); transform:translate(5px,0); opacity:0.85; }
+    75%{ clip-path:inset(10% 0 60% 0); transform:translate(-6px,0); opacity:0.9; }
+    76%{ clip-path:inset(0 0 0 0); transform:translate(0,0); opacity:0; }
+    86%{ clip-path:inset(50% 0 20% 0); transform:translate(4px,0); opacity:0.8; }
+    87%{ clip-path:inset(0 0 0 0); transform:translate(0,0); opacity:0; }
+  }
+  @keyframes glitch-slice-2{
+    0%,58%,100%{ clip-path:inset(0 0 0 0); transform:translate(0,0); opacity:0; }
+    59%{ clip-path:inset(60% 0 10% 0); transform:translate(6px,0); opacity:0.9; }
+    60%{ clip-path:inset(5% 0 68% 0); transform:translate(-6px,0); opacity:0.9; }
+    61%{ clip-path:inset(35% 0 30% 0); transform:translate(5px,0); opacity:0.85; }
+    62%{ clip-path:inset(0 0 0 0); transform:translate(0,0); opacity:0; }
+    74%{ clip-path:inset(15% 0 45% 0); transform:translate(-5px,0); opacity:0.85; }
+    75%{ clip-path:inset(55% 0 12% 0); transform:translate(6px,0); opacity:0.9; }
+    76%{ clip-path:inset(0 0 0 0); transform:translate(0,0); opacity:0; }
+    86%{ clip-path:inset(18% 0 52% 0); transform:translate(-4px,0); opacity:0.8; }
+    87%{ clip-path:inset(0 0 0 0); transform:translate(0,0); opacity:0; }
   }
  
   .ok-btn{
@@ -211,6 +229,12 @@
     font-size:16px;
     font-weight:700;
     letter-spacing:0.4px;
+    cursor:pointer;
+    user-select:none;
+    -webkit-tap-highlight-color:transparent;
+  }
+  .ok-btn:active{
+    background:rgba(255,255,255,0.24);
   }
  
   .footnote{
@@ -234,6 +258,38 @@
     margin-top:22px;
     letter-spacing:0.3px;
   }
+ 
+  /* === TRYB PEŁNOEKRANOWY NA TELEFONIE ===
+     Poniżej tej szerokości uznajemy, że plik jest otwarty
+     bezpośrednio na realnym telefonie — wtedy "makieta" znika
+     i alert wypełnia cały ekran urządzenia, respektując notch/wcięcia. */
+  @media (max-width: 480px){
+    .stage{
+      padding:0;
+      min-height:100dvh;
+    }
+    .phone{
+      width:100vw;
+      height:100dvh;
+      border-radius:0;
+      box-shadow:none;
+    }
+    .notch,
+    .home-indicator{
+      display:none; /* to były elementy dekoracyjne makiety, na realnym ekranie zbędne */
+    }
+    .statusbar{
+      padding-top:calc(env(safe-area-inset-top, 12px) + 6px);
+      padding-left:calc(env(safe-area-inset-left, 26px));
+      padding-right:calc(env(safe-area-inset-right, 26px));
+    }
+    .footnote{
+      margin-bottom:calc(env(safe-area-inset-bottom, 0px) + 8px);
+    }
+    .caption{
+      display:none; /* podpis pod makietą - niepotrzebny w trybie realnym */
+    }
+  }
 </style>
 </head>
 <body>
@@ -242,7 +298,7 @@
       <div class="phone">
         <div class="notch"></div>
         <div class="statusbar">
-          <span>2:47 AM</span>
+          <span>2:47</span>
           <span>Chicago, IL</span>
         </div>
  
@@ -254,19 +310,22 @@
             <div class="siren-bar"></div>
             <div class="siren-bar"></div>
           </div>
-          <div class="headline">Alert kryzysowy</div>
+          <div class="headline">Emergency Alert</div>
  
           <div class="sheet">
-            <div class="sheet-title">Alert o zagrożeniu</div>
+            <div class="sheet-title">Alert Bezpieczeństwa</div>
             <div class="sheet-body">
-              Pozostań w bezpiecznym miejscu. Zgłoszono wybuch w centrum Chicago. Unikaj obszaru w promieniu 500&nbsp;m od miejsca zdarzenia. Nie zbliżaj się do budynku. Czekaj na dalsze instrukcje.
+              Pozostań w budynku. Zgłoszono wybuch w centrum Chicago. Unikaj obszaru w promieniu 500 m od miejsca zdarzenia. Nie zbliżaj się do budynku. Oczekuj na dalsze instrukcje.
             </div>
             <div class="sheet-divider"></div>
-            <div class="sheet-extra">Ogród zapomniał swojej Pani.<br>Ona o nim nie zapomniała.</div>
+            <div class="sheet-extra" id="sheetExtra">
+              <span class="glitch" data-text="Ogród zapomniał swojej Pani.">Ogród zapomniał swojej Pani.</span><br>
+              <span class="glitch" data-text="Ona o nim nie zapomniała.">Ona o nim nie zapomniała.</span>
+            </div>
           </div>
  
-          <div class="ok-btn">OK</div>
-          <div class="footnote">Aby wyciszyć alert, dotknij OK. Dźwięk będzie trwał do tego momentu.</div>
+          <div class="ok-btn" id="okBtn">OK</div>
+          <div class="footnote">Aby zamknąć ten alert, dotknij OK. Sygnał dźwiękowy będzie trwał do momentu zamknięcia.</div>
         </div>
  
         <div class="home-indicator"></div>
@@ -274,6 +333,26 @@
       <div class="caption">alert wysłany jednocześnie do wszystkich telefonów w mieście — 2:47 AM</div>
     </div>
   </div>
+ 
+  <script>
+    // Po kliknięciu OK: ujawnij zaglitchowany fragment zamiast od razu zamykać alert.
+    // Drugie kliknięcie (gdy tekst już widoczny) faktycznie zamyka/chowa alert.
+    const okBtn = document.getElementById('okBtn');
+    const sheetExtra = document.getElementById('sheetExtra');
+    let revealed = false;
+ 
+    okBtn.addEventListener('click', () => {
+      if (!revealed) {
+        sheetExtra.classList.add('revealed');
+        revealed = true;
+        // Tekst stoi spokojnie przez chwilę, dopiero potem zaczyna glitchować
+        setTimeout(() => {
+          sheetExtra.classList.add('glitching');
+        }, 50);
+      } else {
+        document.querySelector('.takeover').style.display = 'none';
+      }
+    });
+  </script>
 </body>
 </html>
- 
