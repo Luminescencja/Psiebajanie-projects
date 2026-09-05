@@ -255,13 +255,12 @@
     letter-spacing:0.3px;
   }
 
-  /* === Easter egg: ekran komunikatora widoczny po zamknięciu alertu === */
   .comms{
     display:none;
     flex:1;
     flex-direction:column;
     background:#0e0f13;
-    min-height:0; /* pozwala flex-childowi się skurczyć, żeby lista mogła scrollować zamiast wychodzić poza ekran */
+    min-height:0;
   }
   .comms.active{
     display:flex;
@@ -382,7 +381,7 @@
         <div class="notch"></div>
         <div class="statusbar">
           <span>2:47</span>
-          <span>Chicago, IL</span>
+          <span>AT&T 5G📶</span>
         </div>
 
         <div class="takeover">
