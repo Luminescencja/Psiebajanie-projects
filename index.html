@@ -20,8 +20,6 @@
     overflow:hidden;
   }
 
-  /* Na desktopie / dużym ekranie: pokaż makietę telefonu na środku.
-     Na realnym telefonie (max-width: 480px): wypełnij cały ekran. */
   .stage{
     min-height:100dvh;
     display:flex;
@@ -60,7 +58,6 @@
     font-size:13px; font-weight:600; color:var(--text-hi);
   }
 
-  /* full-screen emergency takeover */
   .takeover{
     flex:1;
     display:flex;
@@ -142,7 +139,6 @@
     opacity:1;
   }
 
-  /* --- Glitch na fragmencie o Ogrodzie (intensywny) --- */
   .glitch{
     position:relative;
     display:inline-block;
@@ -265,6 +261,7 @@
     flex:1;
     flex-direction:column;
     background:#0e0f13;
+    min-height:0; /* pozwala flex-childowi się skurczyć, żeby lista mogła scrollować zamiast wychodzić poza ekran */
   }
   .comms.active{
     display:flex;
@@ -290,7 +287,9 @@
   .comms-sub svg{ width:11px; height:11px; }
   .comms-list{
     flex:1;
+    min-height:0; /* to samo co wyżej - bez tego ostatni wiersz (plug uwu) wychodził poza ekran zamiast być scrollowalny */
     overflow-y:auto;
+    -webkit-overflow-scrolling:touch;
     padding:2px 0 10px 0;
   }
   .chat-row{
@@ -336,6 +335,10 @@
     overflow:hidden;
     text-overflow:ellipsis;
   }
+  .chat-preview strong{
+    color:rgba(255,255,255,0.72);
+    font-weight:700;
+  }
   .chat-section-label{
     padding:14px 18px 4px 18px;
     color:rgba(255,255,255,0.35);
@@ -343,10 +346,6 @@
     font-weight:600;
   }
 
-  /* === TRYB PEŁNOEKRANOWY NA TELEFONIE ===
-     Poniżej tej szerokości uznajemy, że plik jest otwarty
-     bezpośrednio na realnym telefonie — wtedy "makieta" znika
-     i alert wypełnia cały ekran urządzenia, respektując notch/wcięcia. */
   @media (max-width: 480px){
     .stage{
       padding:0;
@@ -360,7 +359,7 @@
     }
     .notch,
     .home-indicator{
-      display:none; /* to były elementy dekoracyjne makiety, na realnym ekranie zbędne */
+      display:none;
     }
     .statusbar{
       padding-top:calc(env(safe-area-inset-top, 12px) + 6px);
@@ -371,7 +370,7 @@
       margin-bottom:calc(env(safe-area-inset-bottom, 0px) + 8px);
     }
     .caption{
-      display:none; /* podpis pod makietą - niepotrzebny w trybie realnym */
+      display:none;
     }
   }
 </style>
@@ -429,7 +428,7 @@
                   <span class="chat-name">Caern</span>
                   <span class="chat-time">02:44</span>
                 </div>
-                <div class="chat-preview">Krocząca: Nie wracajcie narazie do caernu</div>
+                <div class="chat-preview"><strong>Krocząca:</strong> Nie wracajcie narazie do caernu</div>
               </div>
             </div>
             <div class="chat-row">
@@ -439,7 +438,7 @@
                   <span class="chat-name">Psia rodzina ;3</span>
                   <span class="chat-time">08:31</span>
                 </div>
-                <div class="chat-preview">Ciche łapy: Mamy 120kg</div>
+                <div class="chat-preview"><strong>Ciche łapy:</strong> Mamy 120kg</div>
               </div>
             </div>
             <div class="chat-row">
@@ -449,29 +448,7 @@
                   <span class="chat-name">Psia rodzina + Elwira</span>
                   <span class="chat-time">02:19</span>
                 </div>
-                <div class="chat-preview">Elwira: Ej wyślijcie mi adres lodówki</div>
-              </div>
-            </div>
-
-            <div class="chat-section-label">Kontakty</div>
-            <div class="chat-row">
-              <div class="chat-avatar" style="background:#8a5a8a;">A</div>
-              <div class="chat-body">
-                <div class="chat-row-top">
-                  <span class="chat-name">Abidgail</span>
-                  <span class="chat-time">01:58</span>
-                </div>
-                <div class="chat-preview">Abidgail: Jesteśmy już na miejscu</div>
-              </div>
-            </div>
-            <div class="chat-row">
-              <div class="chat-avatar" style="background:#a3672e;">K</div>
-              <div class="chat-body">
-                <div class="chat-row-top">
-                  <span class="chat-name">Karmazyn na wietrze</span>
-                  <span class="chat-time">14 oct.</span>
-                </div>
-                <div class="chat-preview">Karmazyn: Wróćcie do Caernu... Szybko!!!</div>
+                <div class="chat-preview"><strong>Elwira:</strong> Ej wyślijcie mi adres lodówki</div>
               </div>
             </div>
             <div class="chat-row">
@@ -481,7 +458,7 @@
                   <span class="chat-name">Chicago</span>
                   <span class="chat-time">01:20</span>
                 </div>
-                <div class="chat-preview">Hachiko: Ej, Willis tower to wy??!??</div>
+                <div class="chat-preview"><strong>Hachiko:</strong> Ej, Willis tower to wy??!??</div>
               </div>
             </div>
             <div class="chat-row">
@@ -489,9 +466,9 @@
               <div class="chat-body">
                 <div class="chat-row-top">
                   <span class="chat-name">Milwaukee</span>
-                  <span class="chat-time">01:05</span>
+                  <span class="chat-time">9 nov.</span>
                 </div>
-                <div class="chat-preview">Huragan: Kiedy wpadacie na Twistera?</div>
+                <div class="chat-preview"><strong>Huragan:</strong> Kiedy wpadacie na Twistera?</div>
               </div>
             </div>
             <div class="chat-row">
@@ -501,7 +478,7 @@
                   <span class="chat-name">Lake Geneva</span>
                   <span class="chat-time">27 dec.</span>
                 </div>
-                <div class="chat-preview">Płomień Gai: Spokojnie, zajmiemy się nimi :)</div>
+                <div class="chat-preview"><strong>Płomień Gai:</strong> Spokojnie, zajmiemy się nimi :)</div>
               </div>
             </div>
             <div class="chat-row">
@@ -509,9 +486,31 @@
               <div class="chat-body">
                 <div class="chat-row-top">
                   <span class="chat-name">Thunder Bay</span>
-                  <span class="chat-time">00:23</span>
+                  <span class="chat-time">2 sty.</span>
                 </div>
-                <div class="chat-preview">Krocząca: Musimy porozmawiać z duchami</div>
+                <div class="chat-preview"><strong>Krocząca:</strong> Musimy porozmawiać z duchami</div>
+              </div>
+            </div>
+
+            <div class="chat-section-label">Kontakty</div>
+            <div class="chat-row">
+              <div class="chat-avatar" style="background:#a3672e;">K</div>
+              <div class="chat-body">
+                <div class="chat-row-top">
+                  <span class="chat-name">Karmazyn na wietrze</span>
+                  <span class="chat-time">14 oct.</span>
+                </div>
+                <div class="chat-preview"><strong>Karmazyn:</strong> Wróćcie do Caernu... Szybko!!!</div>
+              </div>
+            </div>
+            <div class="chat-row">
+              <div class="chat-avatar" style="background:#8a5a8a;">A</div>
+              <div class="chat-body">
+                <div class="chat-row-top">
+                  <span class="chat-name">Abidgail</span>
+                  <span class="chat-time">01:58</span>
+                </div>
+                <div class="chat-preview"><strong>Abidgail:</strong> Jesteśmy już na miejscu</div>
               </div>
             </div>
             <div class="chat-row">
@@ -521,7 +520,7 @@
                   <span class="chat-name">plug uwu</span>
                   <span class="chat-time">23:58</span>
                 </div>
-                <div class="chat-preview">plug uwu: będzie w naszej skrytce</div>
+                <div class="chat-preview"><strong>plug uwu:</strong> będzie w naszej skrytce</div>
               </div>
             </div>
           </div>
@@ -534,8 +533,6 @@
   </div>
 
   <script>
-    // Po kliknięciu OK: ujawnij zaglitchowany fragment zamiast od razu zamykać alert.
-    // Drugie kliknięcie (gdy tekst już widoczny) faktycznie zamyka/chowa alert.
     const okBtn = document.getElementById('okBtn');
     const sheetExtra = document.getElementById('sheetExtra');
     let revealed = false;
@@ -544,7 +541,6 @@
       if (!revealed) {
         sheetExtra.classList.add('revealed');
         revealed = true;
-        // Tekst stoi spokojnie przez chwilę, dopiero potem zaczyna glitchować
         setTimeout(() => {
           sheetExtra.classList.add('glitching');
         }, 50);
