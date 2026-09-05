@@ -126,9 +126,78 @@
     margin:14px 0 12px 0;
   }
   .sheet-extra{
+    position:relative;
     color:var(--text-hi);
     font-size:14.5px;
     line-height:1.55;
+    animation:glitch-skew 0.5s infinite steps(1), flicker 0.12s infinite steps(1);
+  }
+  .sheet-extra::before,
+  .sheet-extra::after{
+    content:"Ogród zapomniał swojej Pani.\A Ona o nim nie zapomniała.";
+    white-space:pre;
+    position:absolute;
+    left:0; top:0; right:0;
+    line-height:1.55;
+    background:var(--panel);
+    overflow:hidden;
+  }
+  .sheet-extra::before{
+    color:#ff2d55;
+    animation:glitch-1 0.5s infinite linear;
+    clip-path:inset(0 0 0 0);
+  }
+  .sheet-extra::after{
+    color:#2dd7ff;
+    animation:glitch-2 0.45s infinite linear;
+    clip-path:inset(0 0 0 0);
+  }
+  @keyframes flicker{
+    0%,100%{ opacity:1; }
+    38%{ opacity:1; }
+    39%{ opacity:0.3; }
+    40%{ opacity:1; }
+    63%{ opacity:1; }
+    64%{ opacity:0.15; }
+    66%{ opacity:1; }
+  }
+  @keyframes glitch-skew{
+    0%, 40%, 100%{ transform:translate(0,0); }
+    8%{ transform:translate(-4px,1px); }
+    16%{ transform:translate(3px,-2px); }
+    24%{ transform:translate(-2px,2px); letter-spacing:1px; }
+    32%{ transform:translate(4px,0); letter-spacing:0; }
+    48%{ transform:translate(-3px,-1px); }
+    56%{ transform:translate(2px,1px); }
+    72%{ transform:translate(-5px,0); }
+    80%{ transform:translate(3px,2px); }
+    90%{ transform:translate(-2px,-1px); }
+  }
+  @keyframes glitch-1{
+    0%, 100%{ opacity:0; clip-path:inset(0 0 100% 0); transform:translate(0,0); }
+    5%{ opacity:0.9; clip-path:inset(10% 0 60% 0); transform:translate(-6px,-2px); }
+    15%{ opacity:0; clip-path:inset(0 0 100% 0); }
+    30%{ opacity:0.9; clip-path:inset(55% 0 10% 0); transform:translate(6px,2px); }
+    38%{ opacity:0; }
+    50%{ opacity:0.9; clip-path:inset(20% 0 40% 0); transform:translate(-4px,0); }
+    58%{ opacity:0; }
+    70%{ opacity:0.9; clip-path:inset(35% 0 25% 0); transform:translate(5px,-1px); }
+    78%{ opacity:0; }
+    88%{ opacity:0.9; clip-path:inset(5% 0 70% 0); transform:translate(-3px,1px); }
+    95%{ opacity:0; }
+  }
+  @keyframes glitch-2{
+    0%, 100%{ opacity:0; clip-path:inset(100% 0 0 0); transform:translate(0,0); }
+    6%{ opacity:0.9; clip-path:inset(60% 0 15% 0); transform:translate(5px,1px); }
+    14%{ opacity:0; }
+    28%{ opacity:0.9; clip-path:inset(15% 0 55% 0); transform:translate(-5px,-2px); }
+    36%{ opacity:0; }
+    52%{ opacity:0.9; clip-path:inset(40% 0 20% 0); transform:translate(4px,0); }
+    60%{ opacity:0; }
+    74%{ opacity:0.9; clip-path:inset(25% 0 45% 0); transform:translate(-4px,1px); }
+    82%{ opacity:0; }
+    92%{ opacity:0.9; clip-path:inset(65% 0 5% 0); transform:translate(3px,-1px); }
+    98%{ opacity:0; }
   }
  
   .ok-btn{
@@ -207,3 +276,4 @@
   </div>
 </body>
 </html>
+ 
