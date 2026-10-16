@@ -1,0 +1,536 @@
+<!doctype html>
+<html lang="pl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Drzewo Matek</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Alegreya:ital,wght@0,500;0,700;1,500&family=Alegreya+Sans:ital,wght@0,400;0,500;0,700;1,400&display=swap">
+<style>
+:root {
+  --bg: #eceff4;
+  --surface: #f8f9fb;
+  --fg: #1b2133;
+  --muted: #566079;
+  --line: #aab2c4;
+  --line-strong: #8892a9;
+  --tip-bg: #ffffff;
+  --shadow: 0 12px 32px rgba(20, 28, 50, .20);
+  --trunk: #35536f;
+  --ck: #8b5a12;
+  --lilly: #17636d;
+  --on-acc: #ffffff;
+  --moon-shade: #c9d0de;
+  --moon-lit: #3b4560;
+  --moon-ring: #3b4560;
+  --t-star: #4f58c4;
+  --t-strider: #2f8764;
+  --t-gnawer: #8a5f3c;
+  --t-shadow: #7a46a0;
+  --t-fury: #b3304f;
+  --t-fenris: #3d7fa5;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #0e1220;
+    --surface: #161b2d;
+    --fg: #e7e9f3;
+    --muted: #9ba3ba;
+    --line: #33405f;
+    --line-strong: #4a5878;
+    --tip-bg: #1d2440;
+    --shadow: 0 14px 34px rgba(0, 0, 0, .55);
+    --trunk: #9bb9d6;
+    --ck: #e2ac55;
+    --lilly: #63c6d0;
+    --on-acc: #10131f;
+    --moon-shade: #2a3150;
+    --moon-lit: #e9e6d6;
+    --moon-ring: #cfd3e3;
+    --t-star: #8d96ff;
+    --t-strider: #5cc79b;
+    --t-gnawer: #c99468;
+    --t-shadow: #b98be0;
+    --t-fury: #ff7a97;
+    --t-fenris: #79b8dd;
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #0e1220;
+  --surface: #161b2d;
+  --fg: #e7e9f3;
+  --muted: #9ba3ba;
+  --line: #33405f;
+  --line-strong: #4a5878;
+  --tip-bg: #1d2440;
+  --shadow: 0 14px 34px rgba(0, 0, 0, .55);
+  --trunk: #9bb9d6;
+  --ck: #e2ac55;
+  --lilly: #63c6d0;
+  --on-acc: #10131f;
+  --moon-shade: #2a3150;
+  --moon-lit: #e9e6d6;
+  --moon-ring: #cfd3e3;
+  --t-star: #8d96ff;
+  --t-strider: #5cc79b;
+  --t-gnawer: #c99468;
+  --t-shadow: #b98be0;
+  --t-fury: #ff7a97;
+  --t-fenris: #79b8dd;
+  color-scheme: dark;
+}
+
+* { box-sizing: border-box; }
+html { scroll-behavior: smooth; }
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--fg);
+  font: 17px/1.5 "Alegreya Sans", system-ui, "Segoe UI", sans-serif;
+  padding-block: 36px 80px;
+  padding-left: max(16px, env(safe-area-inset-left, 0px));
+  padding-right: max(16px, env(safe-area-inset-right, 0px));
+}
+.wrap { max-width: 1080px; margin-inline: auto; }
+h1, h2 { font-family: "Alegreya", Georgia, "Times New Roman", serif; text-wrap: balance; }
+
+/* ---------- nagłówek ---------- */
+.top { max-width: 64ch; }
+.kicker {
+  margin: 0 0 6px;
+  font-size: .8rem; font-weight: 700; letter-spacing: .16em; text-transform: uppercase;
+  color: var(--acc, var(--trunk));
+}
+h1 { margin: 0; font-size: clamp(2.5rem, 7vw, 3.8rem); font-weight: 700; line-height: 1.02; }
+.lede { margin: 14px 0 0; color: var(--muted); font-size: 1.1rem; }
+.stats {
+  display: flex; flex-wrap: wrap; gap: 8px 32px;
+  margin: 22px 0 0; padding: 0; list-style: none;
+}
+.stats li { display: flex; align-items: baseline; gap: 8px; }
+.stats b { font: 700 1.9rem/1 "Alegreya", Georgia, serif; color: var(--trunk); }
+.stats span { color: var(--muted); font-size: .95rem; }
+
+.bar {
+  display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between;
+  gap: 12px 24px; margin-top: 32px;
+}
+.bar nav, .chips { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+.bar .lbl { font-size: .78rem; letter-spacing: .1em; text-transform: uppercase; color: var(--muted); margin-right: 2px; }
+.bar a, .chips button {
+  font: 500 .95rem/1 "Alegreya Sans", system-ui, sans-serif;
+  color: var(--fg); background: var(--surface);
+  border: 1px solid var(--line-strong); border-radius: 999px;
+  padding: 9px 14px; text-decoration: none; cursor: pointer;
+}
+.bar a:hover, .chips button:hover { border-color: var(--fg); }
+.chips button[aria-pressed="true"] { background: var(--fg); color: var(--bg); border-color: var(--fg); }
+.bar a:focus-visible, .chips button:focus-visible, .person:focus-visible { outline: 3px solid var(--fg); outline-offset: 3px; }
+
+/* ---------- legenda ---------- */
+.legend {
+  display: grid; grid-template-columns: repeat(auto-fit, minmax(230px, 1fr)); gap: 22px 32px;
+  margin-top: 26px; padding: 20px 22px;
+  background: var(--surface); border: 1px solid var(--line); border-radius: 12px;
+}
+.legend h2 { margin: 0 0 10px; font-size: .78rem; font: 700 .78rem/1.2 "Alegreya Sans", system-ui, sans-serif; letter-spacing: .14em; text-transform: uppercase; color: var(--muted); }
+.legend ul { list-style: none; margin: 0; padding: 0; display: grid; gap: 7px; font-size: .96rem; }
+.legend li { display: flex; align-items: center; gap: 10px; }
+.legend li > span { min-width: 0; }
+.swatch { flex: none; width: 26px; height: 18px; border-radius: 4px; border: 1px solid var(--line-strong); background: var(--surface); border-top: 3px solid var(--trunk); }
+.swatch.k { border-style: dashed; border-top-width: 1px; background: var(--bg); }
+
+.dot { display: inline-block; flex: none; width: 11px; height: 11px; border-radius: 50%; margin-right: 8px; vertical-align: -1px; background: var(--muted); }
+.legend .dot { margin-right: 0; }
+.dot.star { background: var(--t-star); }
+.dot.strider { background: var(--t-strider); }
+.dot.gnawer { background: var(--t-gnawer); }
+.dot.shadow { background: var(--t-shadow); }
+.dot.fury { background: var(--t-fury); }
+.dot.fenris { background: var(--t-fenris); }
+
+.moon { flex: none; }
+.m-shade { fill: var(--moon-shade); }
+.m-lit { fill: var(--moon-lit); }
+.m-ring { fill: none; stroke: var(--moon-ring); stroke-width: 1; }
+
+/* ---------- drzewo ---------- */
+.tree { margin-top: 56px; --acc: var(--trunk); }
+.ck { --acc: var(--ck); }
+.lilly { --acc: var(--lilly); }
+
+.bhead { text-align: center; margin: 0 auto 20px; max-width: 34rem; }
+.bhead h2 { margin: 0; font-size: clamp(1.8rem, 4.5vw, 2.4rem); font-weight: 700; line-height: 1.1; color: var(--acc); }
+.bhead p { margin: 6px 0 0; color: var(--muted); font-size: .98rem; }
+
+.chain { list-style: none; margin: 0 auto; padding: 0; display: flex; flex-direction: column; gap: 20px; }
+.trunk { max-width: 780px; }
+.chain > li { position: relative; display: flex; justify-content: center; }
+.chain > li::before {
+  content: ""; position: absolute; left: 50%; top: -20px; height: 20px; margin-left: -1px;
+  border-left: 2px solid var(--line);
+}
+.trunk > li:first-child::before { display: none; }
+
+.era .lbl {
+  display: inline-flex; flex-wrap: wrap; justify-content: center; gap: 2px 10px;
+  padding: 6px 16px; border: 1px solid var(--line); border-radius: 999px;
+  background: var(--bg); text-align: center;
+  font-size: .78rem; letter-spacing: .12em; text-transform: uppercase; color: var(--muted);
+}
+.era .t { font-weight: 700; color: var(--fg); }
+
+.pnode { position: relative; width: min(100%, 380px); }
+.pair-row { position: relative; width: 100%; display: flex; flex-wrap: wrap; justify-content: center; gap: 14px; }
+.pair-row .pnode { flex: 1 1 100%; }
+@media (min-width: 560px) {
+  .pair-row .pnode { flex: 1 1 0; }
+  .pair-row::before { content: ""; position: absolute; left: 25%; right: 25%; top: 50%; border-top: 2px solid var(--line); }
+  .pair::after { content: ""; position: absolute; left: 50%; top: 50%; bottom: -20px; margin-left: -1px; border-left: 2px solid var(--line); }
+}
+
+.person {
+  position: relative; display: block; width: 100%; margin: 0; padding: 12px 14px 13px;
+  font: inherit; color: inherit; text-align: center; cursor: pointer;
+  background: var(--surface);
+  border: 1px solid var(--line-strong); border-top: 3px solid var(--acc); border-radius: 10px;
+  transition: box-shadow .15s ease, opacity .15s ease;
+}
+.person.k, .person.x {
+  background: var(--bg); border-style: dashed; border-top-style: dashed; border-top-width: 1px;
+}
+.person.now { box-shadow: 0 0 0 2px var(--acc); }
+.pnode:hover .person, .pnode.open .person { box-shadow: 0 0 0 2px var(--acc); }
+
+.name { display: block; font: 700 1.25rem/1.2 "Alegreya", Georgia, serif; overflow-wrap: anywhere; text-wrap: balance; }
+.name.kin { font-weight: 500; }
+.name.kin::before { content: "○ "; color: var(--muted); font-weight: 400; }
+.person.x .name { font-weight: 500; }
+.civil { display: block; margin-top: 1px; font-style: italic; color: var(--muted); font-size: .95rem; }
+.rec { display: block; margin-top: 6px; font-size: .9rem; line-height: 1.35; overflow-wrap: anywhere; }
+.rec + .rec { margin-top: 2px; }
+.lab { margin-right: .45em; font-size: .72rem; font-weight: 500; letter-spacing: .09em; text-transform: uppercase; color: var(--muted); }
+.val b { font-weight: 700; }
+/* ---------- dymek ---------- */
+.tip {
+  position: absolute; z-index: 30; left: 50%; top: calc(100% + 8px);
+  width: min(320px, calc(100vw - 32px)); padding: 12px 14px 13px;
+  background: var(--tip-bg); color: var(--fg);
+  border: 1px solid var(--line-strong); border-top: 3px solid var(--acc); border-radius: 10px;
+  box-shadow: var(--shadow);
+  text-align: left; font-size: .96rem; line-height: 1.4;
+  transform: translateX(calc(-50% + var(--shift, 0px)));
+  visibility: hidden; opacity: 0; pointer-events: none;
+  transition: opacity .14s ease, visibility 0s linear .14s;
+}
+.tip::before { content: ""; position: absolute; left: 0; right: 0; top: -10px; height: 10px; }
+.pnode.up .tip { top: auto; bottom: calc(100% + 8px); }
+.pnode.up .tip::before { top: auto; bottom: -10px; }
+.pnode.open .tip, .pnode:has(.person:focus-visible) .tip {
+  visibility: visible; opacity: 1; pointer-events: auto; transition-delay: 0s;
+}
+@media (hover: hover) {
+  .pnode:hover .tip { visibility: visible; opacity: 1; pointer-events: auto; transition-delay: 0s; }
+}
+.pnode.hush .tip { visibility: hidden !important; opacity: 0 !important; pointer-events: none !important; }
+
+.facts { margin: 0; display: grid; gap: 7px; }
+.facts > div { display: grid; grid-template-columns: 5.8rem minmax(0, 1fr); gap: 10px; align-items: baseline; }
+.facts dt { font-size: .72rem; font-weight: 500; letter-spacing: .09em; text-transform: uppercase; color: var(--muted); }
+.facts dd { margin: 0; display: flex; align-items: center; gap: 7px; min-width: 0; }
+.facts dd .moon { margin-top: 1px; }
+.note { margin: 10px 0 0; padding-top: 9px; border-top: 1px solid var(--line); color: var(--muted); font-size: .92rem; }
+.facts + .note { margin-top: 10px; }
+.tip > .note:first-child { margin: 0; padding: 0; border: 0; }
+
+/* ---------- rozwidlenie ---------- */
+.fork { position: relative; height: 30px; }
+.fork::before { content: ""; position: absolute; left: 50%; top: 0; bottom: 0; margin-left: -1px; border-left: 2px solid var(--line); }
+.branches { display: grid; grid-template-columns: minmax(0, 1fr); gap: 56px 0; }
+.branch { min-width: 0; scroll-margin-top: 16px; }
+@media (min-width: 760px) {
+  .fork { height: 44px; }
+  .fork::before { bottom: auto; height: 22px; }
+  .fork::after {
+    content: ""; position: absolute; left: 25%; right: 25%; top: 22px; height: 22px;
+    margin-inline: -1px; border: 2px solid var(--line); border-bottom: 0;
+  }
+  .branches { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 0; }
+  .branch { padding-inline: 12px; }
+}
+
+/* ---------- filtr ---------- */
+.tree[data-show="g"] .person.k, .tree[data-show="g"] .person.x, .tree[data-show="k"] .person.g { opacity: .28; }
+.tree[data-show] .pnode:hover .person, .tree[data-show] .pnode.open .person { opacity: 1; }
+
+.foot { margin: 72px auto 0; max-width: 64ch; padding-top: 20px; border-top: 1px solid var(--line); color: var(--muted); font-size: .95rem; text-align: center; }
+.foot p { margin: 0 0 6px; }
+
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
+  .tip, .person { transition: none; }
+}
+</style>
+</head>
+<body>
+
+
+<div class="wrap">
+  <header class="top">
+    <p class="kicker">Linia krwi Dumuzida</p>
+    <h1>Drzewo Matek</h1>
+    <p class="lede">Rodowód po kądzieli: od Dumuzida i Mušēniqtu, których dzieci były Garou, aż po Ciche Łapy i Lilly. Najedź kursorem na osobę (na telefonie dotknij), żeby zobaczyć plemię, patrona, patronat księżycowy, zawód, wiek i matkę.</p>
+    <ul class="stats">
+      <li><b>3 900</b><span>lat od Eufratu do dziś</span></li>
+      <li><b>54</b><span>pokolenia kobiet w każdej linii</span></li>
+      <li><b>74</b><span>osób na drzewie</span></li>
+    </ul>
+  </header>
+
+  <div class="bar">
+    <nav aria-label="Skok do linii">
+      <span class="lbl">Skocz do</span>
+      <a href="#linia-cl">Linia Granado</a>
+      <a href="#linia-lilly">Linia Barba</a>
+    </nav>
+    <div class="chips" role="group" aria-label="Wyróżnij na drzewie">
+      <span class="lbl">Wyróżnij</span>
+      <button type="button" data-f="all" aria-pressed="true">Wszystkie</button>
+      <button type="button" data-f="g" aria-pressed="false">Garou</button>
+      <button type="button" data-f="k" aria-pressed="false">Krewne</button>
+    </div>
+  </div>
+
+  <section class="legend" aria-label="Legenda">
+    <div>
+      <h2>Znaki</h2>
+      <ul>
+        <li><span class="swatch" aria-hidden="true"></span><span><b>Pogrubione imię</b> · Garou</span></li>
+        <li><span class="swatch k" aria-hidden="true"></span><span><b>○ imię</b> · krewna (kinfolk), z zawodem</span></li>
+        <li><span class="swatch" style="visibility:hidden" aria-hidden="true"></span><span><b>ok.</b> · data przybliżona</span></li>
+      </ul>
+    </div>
+    <div>
+      <h2>Patronat księżycowy</h2>
+      <ul><li><svg class="moon" viewBox="0 0 22 22" width="18" height="18" aria-hidden="true" focusable="false"><circle class="m-shade" cx="11" cy="11" r="9"/><circle class="m-ring" cx="11" cy="11" r="9"/></svg><span><b>Ragabash</b> · nów</span></li><li><svg class="moon" viewBox="0 0 22 22" width="18" height="18" aria-hidden="true" focusable="false"><circle class="m-shade" cx="11" cy="11" r="9"/><path class="m-lit" d="M11 2A9 9 0 0 1 11 20A4.5 9 0 0 0 11 2Z"/><circle class="m-ring" cx="11" cy="11" r="9"/></svg><span><b>Teurg</b> · sierp</span></li><li><svg class="moon" viewBox="0 0 22 22" width="18" height="18" aria-hidden="true" focusable="false"><circle class="m-shade" cx="11" cy="11" r="9"/><path class="m-lit" d="M11 2A9 9 0 0 1 11 20L11 2Z"/><circle class="m-ring" cx="11" cy="11" r="9"/></svg><span><b>Filodoks</b> · półksiężyc</span></li><li><svg class="moon" viewBox="0 0 22 22" width="18" height="18" aria-hidden="true" focusable="false"><circle class="m-shade" cx="11" cy="11" r="9"/><path class="m-lit" d="M11 2A9 9 0 0 1 11 20A4.5 9 0 0 1 11 2Z"/><circle class="m-ring" cx="11" cy="11" r="9"/></svg><span><b>Galliard</b> · garb</span></li><li><svg class="moon" viewBox="0 0 22 22" width="18" height="18" aria-hidden="true" focusable="false"><circle class="m-shade" cx="11" cy="11" r="9"/><circle class="m-lit" cx="11" cy="11" r="9"/><circle class="m-ring" cx="11" cy="11" r="9"/></svg><span><b>Ahroun</b> · pełnia</span></li></ul>
+    </div>
+    <div>
+      <h2>Plemię · patron</h2>
+      <ul><li><span class="dot star"></span><span><b>Patrzący w Gwiazdy</b> · Chimera</span></li><li><span class="dot strider"></span><span><b>Cichy Wędrowiec</b> · Sowa</span></li><li><span class="dot gnawer"></span><span><b>Gnatożuj</b> · Szczur</span></li><li><span class="dot shadow"></span><span><b>Władca Cienia</b> · Dziadek Grzmot</span></li><li><span class="dot fury"></span><span><b>Czarna Furia</b> · Pegaz</span></li><li><span class="dot fenris"></span><span><b>Potomek Fenrisa</b> · Fenris</span></li></ul>
+    </div>
+  </section>
+
+  <main class="tree">
+    <div class="trunk-head bhead">
+      <p class="kicker">Pień wspólny</p>
+      <h2>Od Eufratu do Kordoby</h2>
+      <p>Dumuzid, Mušēniqtu i ich córki aż do Isabel de Córdoba, u której linia się rozdziela.</p>
+    </div>
+    <ol class="chain trunk" aria-label="Pień wspólny, od najstarszej do najmłodszej">
+<li class="era"><span class="lbl"><span class="t">Babilon i Eufrat</span><span class="r">ok. 1860–1500 p.n.e.</span></span></li>
+<li class="node g pair"><div class="pair-row"><div class="pnode"><button type="button" class="person x" aria-describedby="tip-1" aria-expanded="false"><span class="name">Mušēniqtu</span><span class="rec"><span class="lab">ur.</span><span class="val"><b>nieznane</b></span></span><span class="rec"><span class="lab">zm.</span><span class="val"><b>nieznane</b></span></span></button><div class="tip" id="tip-1" role="tooltip"><p class="note">Karmicielka szczeniąt, matka dzieci Dumuzida. Czas i miejsce jej narodzin oraz śmierci nie są znane.</p></div></div><div class="pnode"><button type="button" class="person g" aria-describedby="tip-2" aria-expanded="false"><span class="name">Dumuzid</span><span class="rec"><span class="lab">ur.</span><span class="val"><b>ok. 1860 p.n.e.</b> · mokradła dolnego Eufratu koło Eridu</span></span><span class="rec"><span class="lab">zm.</span><span class="val"><b>ok. 1740 p.n.e.</b> · pod Marquette, południowy brzeg Jeziora Górnego</span></span></button><div class="tip" id="tip-2" role="tooltip"><dl class="facts"><div><dt>Plemię</dt><dd>przed czasem plemion</dd></div><div><dt>Patronat księżycowy</dt><dd><svg class="moon" viewBox="0 0 22 22" width="18" height="18" aria-hidden="true" focusable="false"><circle class="m-shade" cx="11" cy="11" r="9"/><circle class="m-lit" cx="11" cy="11" r="9"/><circle class="m-ring" cx="11" cy="11" r="9"/></svg><span>Ahroun (pełnia)</span></dd></div><div><dt>Wiek</dt><dd>120 lat</dd></div></dl><p class="note">Wyjątkowo długie życie jak na Garou. Legendarny Garou, którego grobowiec leży pod Marquette. Wszystkie jego dzieci z Mušēniqtu były Garou.</p></div></div></div></li>
+<li class="node g"><div class="pnode"><button type="button" class="person g" aria-describedby="tip-3" aria-expanded="false"><span class="name">Iltani</span><span class="rec"><span class="lab">ur.</span><span class="val"><b>ok. 1800 p.n.e.</b> · mokradła Eufratu pod Babilonem (okolice dzisiejszej Al-Hilli)</span></span><span class="rec"><span class="lab">zm.</span><span class="val"><b>ok. 1640 p.n.e.</b> · brzeg Eufratu pod Sippar</span></span></button><div class="tip" id="tip-3" role="tooltip"><dl class="facts"><div><dt>Plemię</dt><dd>przed czasem plemion</dd></div><div><dt>Patronat księżycowy</dt><dd><svg class="moon" viewBox="0 0 22 22" width="18" height="18" aria-hidden="true" focusable="false"><circle class="m-shade" cx="11" cy="11" r="9"/><path class="m-lit" d="M11 2A9 9 0 0 1 11 20A4.5 9 0 0 1 11 2Z"/><circle class="m-ring" cx="11" cy="11" r="9"/></svg><span>Galliard (garb)</span></dd></div><div><dt>Wiek</dt><dd>160 lat</dd></div><div><dt>Matka</dt><dd>Mušēniqtu</dd></div></dl><p class="note">Wyjątkowo długie życie jak na Garou. Córka Dumuzida i Mušēniqtu, od niej biorą początek obie linie.</p></div></div></li>
+<li class="node g"><div class="pnode"><button type="button" class="person g" aria-describedby="tip-4" aria-expanded="false"><span class="name">Ahatum</span><span class="rec"><span class="lab">ur.</span><span class="val"><b>ok. 1700 p.n.e.</b> · gaje palmowe nad Eufratem pod Sippar</span></span><span class="rec"><span class="lab">zm.</span><span class="val"><b>ok. 1662 p.n.e.</b> · step nad Eufratem pod Mari (Tell Hariri)</span></span></button><div class="tip" id="tip-4" role="tooltip"><dl class="facts"><div><dt>Plemię</dt><dd>przed czasem plemion</dd></div><div><dt>Patronat księżycowy</dt><dd><svg class="moon" viewBox="0 0 22 22" width="18" height="18" aria-hidden="true" focusable="false"><circle class="m-shade" cx="11" cy="11" r="9"/><path class="m-lit" d="M11 2A9 9 0 0 1 11 20A4.5 9 0 0 0 11 2Z"/><circle class="m-ring" cx="11" cy="11" r="9"/></svg><span>Teurg (sierp)</span></dd></div><div><dt>Wiek</dt><dd>38 lat</dd></div><div><dt>Matka</dt><dd>Iltani</dd></div></dl></div></div></li>
+<li class="node g"><div class="pnode"><button type="button" class="person g" aria-describedby="tip-5" aria-expanded="false"><span class="name">Belessunu</span><span class="rec"><span class="lab">ur.</span><span class="val"><b>ok. 1600 p.n.e.</b> · dolina środkowego Eufratu pod Mari</span></span><span class="rec"><span class="lab">zm.</span><span class="val"><b>ok. 1565 p.n.e.</b> · Pustynia Syryjska przy oazie Tadmor (Palmyra)</span></span></button><div class="tip" id="tip-5" role="tooltip"><dl class="facts"><div><dt>Plemię</dt><dd>przed czasem plemion</dd></div><div><dt>Patronat księżycowy</dt><dd><svg class="moon" viewBox="0 0 22 22" width="18" height="18" aria-hidden="true" focusable="false"><circle class="m-shade" cx="11" cy="11" r="9"/><path class="m-lit" d="M11 2A9 9 0 0 1 11 20L11 2Z"/><circle class="m-ring" cx="11" cy="11" r="9"/></svg><span>Filodoks (półksiężyc)</span></dd></div><div><dt>Wiek</dt><dd>35 lat</dd></div><div><dt>Matka</dt><dd>Ahatum</dd></div></dl></div></div></li>
+<li class="node g"><div class="pnode"><button type="button" class="person g" aria-describedby="tip-6" aria-expanded="false"><span class="name">Rimat-Anum</span><span class="rec"><span class="lab">ur.</span><span class="val"><b>ok. 1500 p.n.e.</b> · dolina górnego Eufratu pod Terqa</span></span><span class="rec"><span class="lab">zm.</span><span class="val"><b>ok. 1469 p.n.e.</b> · step Dżaziry nad rzeką Chabur</span></span></button><div class="tip" id="tip-6" role="tooltip"><dl class="facts"><div><dt>Plemię</dt><dd>przed czasem plemion</dd></div><div><dt>Patronat księżycowy</dt><dd><svg class="moon" viewBox="0 0 22 22" width="18" height="18" aria-hidden="true" focusable="false"><circle class="m-shade" cx="11" cy="11" r="9"/><circle class="m-ring" cx="11" cy="11" r="9"/></svg><span>Ragabash (nów)</span></dd></div><div><dt>Wiek</dt><dd>31 lat</dd></div><div><dt>Matka</dt><dd>Belessunu</dd></div></dl></div></div></li>
+<li class="era"><span class="lbl"><span class="t">Syria i Lewant</span><span class="r">ok. 1400–800 p.n.e.</span></span></li>
+<li class="node g"><div class="pnode"><button type="button" class="person g" aria-describedby="tip-7" aria-expanded="false"><span class="name">Ninatta</span><span class="rec"><span class="lab">ur.</span><span class="val"><b>ok. 1400 p.n.e.</b> · dolina Orontesu pod Alalakh (Tell Atchana)</span></span><span class="rec"><span class="lab">zm.</span><span class="val"><b>ok. 1364 p.n.e.</b> · góry Amanus</span></span></button><div class="tip" id="tip-7" role="tooltip"><dl class="facts"><div><dt>Plemię</dt><dd>przed czasem plemion</dd></div><div><dt>Patronat księżycowy</dt><dd><svg class="moon" viewBox="0 0 22 22" width="18" height="18" aria-hidden="true" focusable="false"><circle class="m-shade" cx="11" cy="11" r="9"/><path class="m-lit" d="M11 2A9 9 0 0 1 11 20A4.5 9 0 0 0 11 2Z"/><circle class="m-ring" cx="11" cy="11" r="9"/></svg><span>Teurg (sierp)</span></dd></div><div><dt>Wiek</dt><dd>36 lat</dd></div><div><dt>Matka</dt><dd>Rimat-Anum</dd></div></dl></div></div></li>
+<li class="node g"><div class="pnode"><button type="button" class="person g" aria-describedby="tip-8" aria-expanded="false"><span class="name">Taram-Kubi</span><span class="rec"><span class="lab">ur.</span><span class="val"><b>ok. 1300 p.n.e.</b> · wybrzeże pod Ugarit (zatoka Minet el-Beida)</span></span><span class="rec"><span class="lab">zm.</span><span class="val"><b>ok. 1262 p.n.e.</b> · stoki Góry Kasjos</span></span></button><div class="tip" id="tip-8" role="tooltip"><dl class="facts"><div><dt>Plemię</dt><dd>przed czasem plemion</dd></div><div><dt>Patronat księżycowy</dt><dd><svg class="moon" viewBox="0 0 22 22" width="18" height="18" aria-hidden="true" focusable="false"><circle class="m-shade" cx="11" cy="11" r="9"/><path class="m-lit" d="M11 2A9 9 0 0 1 11 20A4.5 9 0 0 1 11 2Z"/><circle class="m-ring" cx="11" cy="11" r="9"/></svg><span>Galliard (garb)</span></dd></div><div><dt>Wiek</dt><dd>38 lat</dd></div><div><dt>Matka</dt><dd>Ninatta</dd></div></dl></div></div></li>
+<li class="node g"><div class="pnode"><button type="button" class="person g" aria-describedby="tip-9" aria-expanded="false"><span class="name">Šimiti</span><span class="rec"><span class="lab">ur.</span><span class="val"><b>ok. 1200 p.n.e.</b> · wybrzeże Ugarit koło Ras Szamra</span></span><span class="rec"><span class="lab">zm.</span><span class="val"><b>ok. 1060 p.n.e.</b> · cypel Ras Ibn Hani</span></span></button><div class="tip" id="tip-9" role="tooltip"><dl class="facts"><div><dt>Plemię</dt><dd>przed czasem plemion</dd></div><div><dt>Patronat księżycowy</dt><dd><svg class="moon" viewBox="0 0 22 22" width="18" height="18" aria-hidden="true" focusable="false"><circle class="m-shade" cx="11" cy="11" r="9"/><path class="m-lit" d="M11 2A9 9 0 0 1 11 20L11 2Z"/><circle class="m-ring" cx="11" cy="11" r="9"/></svg><span>Filodoks (półksiężyc)</span></dd></div><div><dt>Wiek</dt><dd>140 lat</dd></div><div><dt>Matka</dt><dd>Taram-Kubi</dd></div></dl><p class="note">Wyjątkowo długie życie jak na Garou.</p></div></div></li>
+<li class="node k"><div class="pnode"><button type="button" class="person k" aria-describedby="tip-10" aria-expanded="false"><span class="name kin">Ahatabisha</span><span class="rec"><span class="lab">ur.</span><span class="val"><b>ok. 1100 p.n.e.</b> · Byblos</span></span><span class="rec"><span class="lab">zm.</span><span class="val"><b>ok. 1046 p.n.e.</b> · lasy cedrowe Libanu koło Bszarri</span></span></button><div class="tip" id="tip-10" role="tooltip"><dl class="facts"><div><dt>Zawód</dt><dd>handlarka drewna cedrowego i papirusu</dd></div><div><dt>Rodzaj</dt><dd>krewna Garou (kinfolk), bez Przemiany</dd></div><div><dt>Wiek</dt><dd>54 lata</dd></div><div><dt>Matka</dt><dd>Šimiti</dd></div></dl></div></div></li>
+<li class="node g"><div class="pnode"><button type="button" class="person g" aria-describedby="tip-11" aria-expanded="false"><span class="name">Batbaal</span><span class="rec"><span class="lab">ur.</span><span class="val"><b>ok. 1000 p.n.e.</b> · wybrzeże pod Tyrem (okolice Ras al-Ajn)</span></span><span class="rec"><span class="lab">zm.</span><span class="val"><b>ok. 960 p.n.e.</b> · stoki Góry Karmel</span></span></button><div class="tip" id="tip-11" role="tooltip"><dl class="facts"><div><dt>Plemię</dt><dd>przed czasem plemion</dd></div><div><dt>Patronat księżycowy</dt><dd><svg class="moon" viewBox="0 0 22 22" width="18" height="18" aria-hidden="true" focusable="false"><circle class="m-shade" cx="11" cy="11" r="9"/><circle class="m-lit" cx="11" cy="11" r="9"/><circle class="m-ring" cx="11" cy="11" r="9"/></svg><span>Ahroun (pełnia)</span></dd></div><div><dt>Wiek</dt><dd>40 lat</dd></div><div><dt>Matka</dt><dd>Ahatabisha</dd></div></dl></div></div></li>
+<li class="node g"><div class="pnode"><button type="button" class="person g" aria-describedby="tip-12" aria-expanded="false"><span class="name">Amatbaal</span><span class="rec"><span class="lab">ur.</span><span class="val"><b>ok. 900 p.n.e.</b> · zatoka Sydonu (Sajda)</span></span><span class="rec"><span class="lab">zm.</span><span class="val"><b>ok. 862 p.n.e.</b> · stoki Hermonu</span></span></button><div class="tip" id="tip-12" role="tooltip"><dl class="facts"><div><dt>Plemię</dt><dd>przed czasem plemion</dd></div><div><dt>Patronat księżycowy</dt><dd><svg class="moon" viewBox="0 0 22 22" width="18" height="18" aria-hidden="true" focusable="false"><circle class="m-shade" cx="11" cy="11" r="9"/><path class="m-lit" d="M11 2A9 9 0 0 1 11 20A4.5 9 0 0 0 11 2Z"/><circle class="m-ring" cx="11" cy="11" r="9"/></svg><span>Teurg (sierp)</span></dd></div><div><dt>Wiek</dt><dd>38 lat</dd></div><div><dt>Matka</dt><dd>Batbaal</dd></div></dl></div></div></li>
+<li class="node k"><div class="pnode"><button type="button" class="person k" aria-describedby="tip-13" aria-expanded="false"><span class="name kin">Arishat</span><span class="rec"><span class="lab">ur.</span><span class="val"><b>ok. 800 p.n.e.</b> · wyspa Tyr</span></span><span class="rec"><span class="lab">zm.</span><span class="val"><b>ok. 747 p.n.e.</b> · Tyr</span></span></button><div class="tip" id="tip-13" role="tooltip"><dl class="facts"><div><dt>Zawód</dt><dd>farbiarka purpury</dd></div><div><dt>Rodzaj</dt><dd>krewna Garou (kinfolk), bez Przemiany</dd></div><div><dt>Wiek</dt><dd>53 lata</dd></div><div><dt>Matka</dt><dd>Amatbaal</dd></div></dl></div></div></li>
+<li class="era"><span class="lbl"><span class="t">Kartagina i Gades</span><span class="r">ok. 700–100 p.n.e.</span></span></li>
+<li class="node g"><div class="pnode"><button type="button" class="person g" aria-describedby="tip-14" aria-expanded="false"><span class="name">Elishat</span><span class="rec"><span class="lab">ur.</span><span class="val"><b>ok. 700 p.n.e.</b> · wybrzeże Zatoki Tunisu pod Kartaginą</span></span><span class="rec"><span class="lab">zm.</span><span class="val"><b>ok. 665 p.n.e.</b> · laguna Tunisu</span></span></button><div class="tip" id="tip-14" role="tooltip"><dl class="facts"><div><dt>Plemię</dt><dd>przed czasem plemion</dd></div><div><dt>Patronat księżycowy</dt><dd><svg class="moon" viewBox="0 0 22 22" width="18" height="18" aria-hidden="true" focusable="false"><circle class="m-shade" cx="11" cy="11" r="9"/><path class="m-lit" d="M11 2A9 9 0 0 1 11 20L11 2Z"/><circle class="m-ring" cx="11" cy="11" r="9"/></svg><span>Filodoks (półksiężyc)</span></dd></div><div><dt>Wiek</dt><dd>35 lat</dd></div><div><dt>Matka</dt><dd>Arishat</dd></div></dl></div></div></li>
+<li class="node k"><div class="pnode"><button type="button" class="person k" aria-describedby="tip-15" aria-expanded="false"><span class="name kin">Hannat</span><span class="rec"><span class="lab">ur.</span><span class="val"><b>ok. 600 p.n.e.</b> · Kartagina (wzgórze Byrsa)</span></span><span class="rec"><span class="lab">zm.</span><span class="val"><b>ok. 548 p.n.e.</b> · Kartagina</span></span></button><div class="tip" id="tip-15" role="tooltip"><dl class="facts"><div><dt>Zawód</dt><dd>kapłanka Tanit</dd></div><div><dt>Rodzaj</dt><dd>krewna Garou (kinfolk), bez Przemiany</dd></div><div><dt>Wiek</dt><dd>52 lata</dd></div><div><dt>Matka</dt><dd>Elishat</dd></div></dl></div></div></li>
+<li class="node g"><div class="pnode"><button type="button" class="person g" aria-describedby="tip-16" aria-expanded="false"><span class="name">Amatmelqart</span><span class="rec"><span class="lab">ur.</span><span class="val"><b>ok. 500 p.n.e.</b> · zatoka Kadyksu pod Gades</span></span><span class="rec"><span class="lab">zm.</span><span class="val"><b>ok. 470 p.n.e.</b> · mokradła Marismas del Guadalquivir koło Doñany</span></span></button><div class="tip" id="tip-16" role="tooltip"><dl class="facts"><div><dt>Plemię</dt><dd>przed czasem plemion</dd></div><div><dt>Patronat księżycowy</dt><dd><svg class="moon" viewBox="0 0 22 22" width="18" height="18" aria-hidden="true" focusable="false"><circle class="m-shade" cx="11" cy="11" r="9"/><path class="m-lit" d="M11 2A9 9 0 0 1 11 20A4.5 9 0 0 1 11 2Z"/><circle class="m-ring" cx="11" cy="11" r="9"/></svg><span>Galliard (garb)</span></dd></div><div><dt>Wiek</dt><dd>30 lat</dd></div><div><dt>Matka</dt><dd>Hannat</dd></div></dl></div></div></li>
+<li class="node k"><div class="pnode"><button type="button" class="person k" aria-describedby="tip-17" aria-expanded="false"><span class="name kin">Helissat</span><span class="rec"><span class="lab">ur.</span><span class="val"><b>ok. 400 p.n.e.</b> · Gades</span></span><span class="rec"><span class="lab">zm.</span><span class="val"><b>ok. 347 p.n.e.</b> · Gades</span></span></button><div class="tip" id="tip-17" role="tooltip"><dl class="facts"><div><dt>Zawód</dt><dd>tkaczka lnu</dd></div><div><dt>Rodzaj</dt><dd>krewna Garou (kinfolk), bez Przemiany</dd></div><div><dt>Wiek</dt><dd>53 lata</dd></div><div><dt>Matka</dt><dd>Amatmelqart</dd></div></dl></div></div></li>
+<li class="node k"><div class="pnode"><button type="button" class="person k" aria-describedby="tip-18" aria-expanded="false"><span class="name kin">Safanbaal</span><span class="rec"><span class="lab">ur.</span><span class="val"><b>ok. 300 p.n.e.</b> · Gades</span></span><span class="rec"><span class="lab">zm.</span><span class="val"><b>ok. 248 p.n.e.</b> · Gades</span></span></button><div class="tip" id="tip-18" role="tooltip"><dl class="facts"><div><dt>Zawód</dt><dd>żeglarka i kupcowa</dd></div><div><dt>Rodzaj</dt><dd>krewna Garou (kinfolk), bez Przemiany</dd></div><div><dt>Wiek</dt><dd>52 lata</dd></div><div><dt>Matka</dt><dd>Helissat</dd></div></dl></div></div></li>
+<li class="node g"><div class="pnode"><button type="button" class="person g" aria-describedby="tip-19" aria-expanded="false"><span class="name">Baalat</span><span class="rec"><span class="lab">ur.</span><span class="val"><b>ok. 200 p.n.e.</b> · wyspa Gades</span></span><span class="rec"><span class="lab">zm.</span><span class="val"><b>ok. 168 p.n.e.</b> · skalisty brzeg Cieśniny Gibraltarskiej (Punta de Tarifa)</span></span></button><div class="tip" id="tip-19" role="tooltip"><dl class="facts"><div><dt>Plemię</dt><dd>przed czasem plemion</dd></div><div><dt>Patronat księżycowy</dt><dd><svg class="moon" viewBox="0 0 22 22" width="18" height="18" aria-hidden="true" focusable="false"><circle class="m-shade" cx="11" cy="11" r="9"/><circle class="m-ring" cx="11" cy="11" r="9"/></svg><span>Ragabash (nów)</span></dd></div><div><dt>Wiek</dt><dd>32 lata</dd></div><div><dt>Matka</dt><dd>Safanbaal</dd></div></dl></div></div></li>
+<li class="node k"><div class="pnode"><button type="button" class="person k" aria-describedby="tip-20" aria-expanded="false"><span class="name kin">Cornelia Gaditana</span><span class="rec"><span class="lab">ur.</span><span class="val"><b>ok. 100 p.n.e.</b> · Gades</span></span><span class="rec"><span class="lab">zm.</span><span class="val"><b>ok. 48 p.n.e.</b> · Gades</span></span></button><div class="tip" id="tip-20" role="tooltip"><dl class="facts"><div><dt>Zawód</dt><dd>właścicielka warsztatu garum</dd></div><div><dt>Rodzaj</dt><dd>krewna Garou (kinfolk), bez Przemiany</dd></div><div><dt>Wiek</dt><dd>52 lata</dd></div><div><dt>Matka</dt><dd>Baalat</dd></div></dl></div></div></li>
+<li class="era"><span class="lbl"><span class="t">Rzymska i wizygocka Hispania</span><span class="r">1–600 n.e.</span></span></li>
+<li class="node g"><div class="pnode"><button type="button" class="person g" aria-describedby="tip-21" aria-expanded="false"><span class="name">Szept Wśród Oliwnego Gaju</span><span class="civil">Julia Baetica</span><span class="rec"><span class="lab">ur.</span><span class="val"><b>ok. 1 n.e.</b> · gaje oliwne nad Gwadalkiwirem koło Hispalis</span></span><span class="rec"><span class="lab">zm.</span><span class="val"><b>ok. 76 n.e.</b> · dolina Gwadalkiwiru pod Italiką</span></span></button><div class="tip" id="tip-21" role="tooltip"><dl class="facts"><div><dt>Plemię</dt><dd><span class="dot fury"></span>Czarna Furia</dd></div><div><dt>Patron</dt><dd>Pegaz</dd></div><div><dt>Patronat księżycowy</dt><dd><svg class="moon" viewBox="0 0 22 22" width="18" height="18" aria-hidden="true" focusable="false"><circle class="m-shade" cx="11" cy="11" r="9"/><path class="m-lit" d="M11 2A9 9 0 0 1 11 20A4.5 9 0 0 0 11 2Z"/><circle class="m-ring" cx="11" cy="11" r="9"/></svg><span>Teurg (sierp)</span></dd></div><div><dt>Wiek</dt><dd>75 lat</dd></div><div><dt>Matka</dt><dd>Cornelia Gaditana</dd></div></dl></div></div></li>
+<li class="node g"><div class="pnode"><button type="button" class="person g" aria-describedby="tip-22" aria-expanded="false"><span class="name">Cień Pod Akweduktem</span><span class="civil">Julia Italicensis</span><span class="rec"><span class="lab">ur.</span><span class="val"><b>ok. 100 n.e.</b> · okolice Italiki (Santiponce)</span></span><span class="rec"><span class="lab">zm.</span><span class="val"><b>ok. 187 n.e.</b> · wąwóz rzeki Viar w Sierra Morena</span></span></button><div class="tip" id="tip-22" role="tooltip"><dl class="facts"><div><dt>Plemię</dt><dd><span class="dot fury"></span>Czarna Furia</dd></div><div><dt>Patron</dt><dd>Pegaz</dd></div><div><dt>Patronat księżycowy</dt><dd><svg class="moon" viewBox="0 0 22 22" width="18" height="18" aria-hidden="true" focusable="false"><circle class="m-shade" cx="11" cy="11" r="9"/><path class="m-lit" d="M11 2A9 9 0 0 1 11 20L11 2Z"/><circle class="m-ring" cx="11" cy="11" r="9"/></svg><span>Filodoks (półksiężyc)</span></dd></div><div><dt>Wiek</dt><dd>87 lat</dd></div><div><dt>Matka</dt><dd>Julia Baetica (Szept Wśród Oliwnego Gaju)</dd></div></dl></div></div></li>
+<li class="node g"><div class="pnode"><button type="button" class="person g" aria-describedby="tip-23" aria-expanded="false"><span class="name">Biegnąca przez Zboże</span><span class="civil">Julia Hispalensis</span><span class="rec"><span class="lab">ur.</span><span class="val"><b>ok. 200 n.e.</b> · pola zbożowe pod Hispalis</span></span><span class="rec"><span class="lab">zm.</span><span class="val"><b>ok. 283 n.e.</b> · brzeg Gwadalkiwiru pod Hispalis</span></span></button><div class="tip" id="tip-23" role="tooltip"><dl class="facts"><div><dt>Plemię</dt><dd><span class="dot fury"></span>Czarna Furia</dd></div><div><dt>Patron</dt><dd>Pegaz</dd></div><div><dt>Patronat księżycowy</dt><dd><svg class="moon" viewBox="0 0 22 22" width="18" height="18" aria-hidden="true" focusable="false"><circle class="m-shade" cx="11" cy="11" r="9"/><path class="m-lit" d="M11 2A9 9 0 0 1 11 20A4.5 9 0 0 1 11 2Z"/><circle class="m-ring" cx="11" cy="11" r="9"/></svg><span>Galliard (garb)</span></dd></div><div><dt>Wiek</dt><dd>83 lata</dd></div><div><dt>Matka</dt><dd>Julia Italicensis (Cień Pod Akweduktem)</dd></div></dl></div></div></li>
+<li class="node g"><div class="pnode"><button type="button" class="person g" aria-describedby="tip-24" aria-expanded="false"><span class="name">Strażniczka Mostu</span><span class="civil">Pomponia Cordubensis</span><span class="rec"><span class="lab">ur.</span><span class="val"><b>ok. 300 n.e.</b> · brzeg Gwadalkiwiru pod Cordubą</span></span><span class="rec"><span class="lab">zm.</span><span class="val"><b>ok. 392 n.e.</b> · dolina rzeki Guadiato w Sierra Morena</span></span></button><div class="tip" id="tip-24" role="tooltip"><dl class="facts"><div><dt>Plemię</dt><dd><span class="dot fury"></span>Czarna Furia</dd></div><div><dt>Patron</dt><dd>Pegaz</dd></div><div><dt>Patronat księżycowy</dt><dd><svg class="moon" viewBox="0 0 22 22" width="18" height="18" aria-hidden="true" focusable="false"><circle class="m-shade" cx="11" cy="11" r="9"/><circle class="m-lit" cx="11" cy="11" r="9"/><circle class="m-ring" cx="11" cy="11" r="9"/></svg><span>Ahroun (pełnia)</span></dd></div><div><dt>Wiek</dt><dd>92 lata</dd></div><div><dt>Matka</dt><dd>Julia Hispalensis (Biegnąca przez Zboże)</dd></div></dl></div></div></li>
+<li class="node k"><div class="pnode"><button type="button" class="person k" aria-describedby="tip-25" aria-expanded="false"><span class="name kin">Flavia Emeritensis</span><span class="rec"><span class="lab">ur.</span><span class="val"><b>ok. 400 n.e.</b> · dolina Gwadiany pod Emerita Augusta (Mérida)</span></span><span class="rec"><span class="lab">zm.</span><span class="val"><b>ok. 452 n.e.</b> · dolina Gwadiany</span></span></button><div class="tip" id="tip-25" role="tooltip"><dl class="facts"><div><dt>Zawód</dt><dd>właścicielka winnicy</dd></div><div><dt>Rodzaj</dt><dd>krewna Garou (kinfolk), bez Przemiany</dd></div><div><dt>Wiek</dt><dd>52 lata</dd></div><div><dt>Matka</dt><dd>Pomponia Cordubensis (Strażniczka Mostu)</dd></div></dl></div></div></li>
+<li class="node k"><div class="pnode"><button type="button" class="person k" aria-describedby="tip-26" aria-expanded="false"><span class="name kin">Ingunda</span><span class="rec"><span class="lab">ur.</span><span class="val"><b>ok. 500 n.e.</b> · kanion Tagu pod Toledo</span></span><span class="rec"><span class="lab">zm.</span><span class="val"><b>ok. 551 n.e.</b> · Toledo</span></span></button><div class="tip" id="tip-26" role="tooltip"><dl class="facts"><div><dt>Zawód</dt><dd>pszczelarka</dd></div><div><dt>Rodzaj</dt><dd>krewna Garou (kinfolk), bez Przemiany</dd></div><div><dt>Wiek</dt><dd>51 lat</dd></div><div><dt>Matka</dt><dd>Flavia Emeritensis</dd></div></dl></div></div></li>
+<li class="node k"><div class="pnode"><button type="button" class="person k" aria-describedby="tip-27" aria-expanded="false"><span class="name kin">Leocadia</span><span class="rec"><span class="lab">ur.</span><span class="val"><b>ok. 600 n.e.</b> · Toledo</span></span><span class="rec"><span class="lab">zm.</span><span class="val"><b>ok. 653 n.e.</b> · Toledo</span></span></button><div class="tip" id="tip-27" role="tooltip"><dl class="facts"><div><dt>Zawód</dt><dd>zielarka</dd></div><div><dt>Rodzaj</dt><dd>krewna Garou (kinfolk), bez Przemiany</dd></div><div><dt>Wiek</dt><dd>53 lata</dd></div><div><dt>Matka</dt><dd>Ingunda</dd></div></dl></div></div></li>
+<li class="era"><span class="lbl"><span class="t">Al-Andalus i Kastylia</span><span class="r">700–1500 n.e.</span></span></li>
+<li class="node g"><div class="pnode"><button type="button" class="person g" aria-describedby="tip-28" aria-expanded="false"><span class="name">Księżyc nad Dziedzińcem</span><span class="civil">Oria</span><span class="rec"><span class="lab">ur.</span><span class="val"><b>ok. 700 n.e.</b> · dolina Gwadalkiwiru pod Kordobą</span></span><span class="rec"><span class="lab">zm.</span><span class="val"><b>ok. 738 n.e.</b> · Sierra Nevada pod Mulhacénem</span></span></button><div class="tip" id="tip-28" role="tooltip"><dl class="facts"><div><dt>Plemię</dt><dd><span class="dot star"></span>Patrzący w Gwiazdy</dd></div><div><dt>Patron</dt><dd>Chimera</dd></div><div><dt>Patronat księżycowy</dt><dd><svg class="moon" viewBox="0 0 22 22" width="18" height="18" aria-hidden="true" focusable="false"><circle class="m-shade" cx="11" cy="11" r="9"/><path class="m-lit" d="M11 2A9 9 0 0 1 11 20A4.5 9 0 0 0 11 2Z"/><circle class="m-ring" cx="11" cy="11" r="9"/></svg><span>Teurg (sierp)</span></dd></div><div><dt>Wiek</dt><dd>38 lat</dd></div><div><dt>Matka</dt><dd>Leocadia</dd></div></dl></div></div></li>
+<li class="node k"><div class="pnode"><button type="button" class="person k" aria-describedby="tip-29" aria-expanded="false"><span class="name kin">Zahra</span><span class="rec"><span class="lab">ur.</span><span class="val"><b>ok. 800 n.e.</b> · Kordoba</span></span><span class="rec"><span class="lab">zm.</span><span class="val"><b>ok. 851 n.e.</b> · Kordoba</span></span></button><div class="tip" id="tip-29" role="tooltip"><dl class="facts"><div><dt>Zawód</dt><dd>kopistka rękopisów</dd></div><div><dt>Rodzaj</dt><dd>krewna Garou (kinfolk), bez Przemiany</dd></div><div><dt>Wiek</dt><dd>51 lat</dd></div><div><dt>Matka</dt><dd>Oria (Księżyc nad Dziedzińcem)</dd></div></dl></div></div></li>
+<li class="node k"><div class="pnode"><button type="button" class="person k" aria-describedby="tip-30" aria-expanded="false"><span class="name kin">Fátima</span><span class="rec"><span class="lab">ur.</span><span class="val"><b>ok. 900 n.e.</b> · Kordoba</span></span><span class="rec"><span class="lab">zm.</span><span class="val"><b>ok. 951 n.e.</b> · Kordoba</span></span></button><div class="tip" id="tip-30" role="tooltip"><dl class="facts"><div><dt>Zawód</dt><dd>położna</dd></div><div><dt>Rodzaj</dt><dd>krewna Garou (kinfolk), bez Przemiany</dd></div><div><dt>Wiek</dt><dd>51 lat</dd></div><div><dt>Matka</dt><dd>Zahra</dd></div></dl></div></div></li>
+<li class="node k"><div class="pnode"><button type="button" class="person k" aria-describedby="tip-31" aria-expanded="false"><span class="name kin">Zaynab</span><span class="rec"><span class="lab">ur.</span><span class="val"><b>ok. 1000</b> · Sewilla</span></span><span class="rec"><span class="lab">zm.</span><span class="val"><b>ok. 1052</b> · Sewilla</span></span></button><div class="tip" id="tip-31" role="tooltip"><dl class="facts"><div><dt>Zawód</dt><dd>handlarka jedwabiem</dd></div><div><dt>Rodzaj</dt><dd>krewna Garou (kinfolk), bez Przemiany</dd></div><div><dt>Wiek</dt><dd>52 lata</dd></div><div><dt>Matka</dt><dd>Fátima</dd></div></dl></div></div></li>
+<li class="node g"><div class="pnode"><button type="button" class="person g" aria-describedby="tip-32" aria-expanded="false"><span class="name">Wiatr z Gwadalkiwiru</span><span class="civil">Aixa</span><span class="rec"><span class="lab">ur.</span><span class="val"><b>ok. 1100</b> · ujście Gwadalkiwiru pod Sanlúcar de Barrameda</span></span><span class="rec"><span class="lab">zm.</span><span class="val"><b>ok. 1131</b> · wydmy Doñany</span></span></button><div class="tip" id="tip-32" role="tooltip"><dl class="facts"><div><dt>Plemię</dt><dd><span class="dot strider"></span>Cichy Wędrowiec</dd></div><div><dt>Patron</dt><dd>Sowa</dd></div><div><dt>Patronat księżycowy</dt><dd><svg class="moon" viewBox="0 0 22 22" width="18" height="18" aria-hidden="true" focusable="false"><circle class="m-shade" cx="11" cy="11" r="9"/><circle class="m-ring" cx="11" cy="11" r="9"/></svg><span>Ragabash (nów)</span></dd></div><div><dt>Wiek</dt><dd>31 lat</dd></div><div><dt>Matka</dt><dd>Zaynab</dd></div></dl></div></div></li>
+<li class="node k"><div class="pnode"><button type="button" class="person k" aria-describedby="tip-33" aria-expanded="false"><span class="name kin">Sol</span><span class="rec"><span class="lab">ur.</span><span class="val"><b>ok. 1200</b> · Jaén</span></span><span class="rec"><span class="lab">zm.</span><span class="val"><b>ok. 1253</b> · Jaén</span></span></button><div class="tip" id="tip-33" role="tooltip"><dl class="facts"><div><dt>Zawód</dt><dd>oliwiarka</dd></div><div><dt>Rodzaj</dt><dd>krewna Garou (kinfolk), bez Przemiany</dd></div><div><dt>Wiek</dt><dd>53 lata</dd></div><div><dt>Matka</dt><dd>Aixa (Wiatr z Gwadalkiwiru)</dd></div></dl></div></div></li>
+<li class="node g"><div class="pnode"><button type="button" class="person g" aria-describedby="tip-34" aria-expanded="false"><span class="name">Zimny Szczyt</span><span class="civil">Urraca de Medina</span><span class="rec"><span class="lab">ur.</span><span class="val"><b>ok. 1300</b> · Sierra de Gredos koło Candeleda</span></span><span class="rec"><span class="lab">zm.</span><span class="val"><b>ok. 1334</b> · masyw Peñalara w Sierra de Guadarrama</span></span></button><div class="tip" id="tip-34" role="tooltip"><dl class="facts"><div><dt>Plemię</dt><dd><span class="dot shadow"></span>Władca Cienia</dd></div><div><dt>Patron</dt><dd>Dziadek Grzmot</dd></div><div><dt>Patronat księżycowy</dt><dd><svg class="moon" viewBox="0 0 22 22" width="18" height="18" aria-hidden="true" focusable="false"><circle class="m-shade" cx="11" cy="11" r="9"/><path class="m-lit" d="M11 2A9 9 0 0 1 11 20L11 2Z"/><circle class="m-ring" cx="11" cy="11" r="9"/></svg><span>Filodoks (półksiężyc)</span></dd></div><div><dt>Wiek</dt><dd>34 lata</dd></div><div><dt>Matka</dt><dd>Sol</dd></div></dl></div></div></li>
+<li class="node g"><div class="pnode"><button type="button" class="person g" aria-describedby="tip-35" aria-expanded="false"><span class="name">Stalowa Nić</span><span class="civil">Beatriz de Medina</span><span class="rec"><span class="lab">ur.</span><span class="val"><b>ok. 1400</b> · wyżyna Mesety pod Medina del Campo</span></span><span class="rec"><span class="lab">zm.</span><span class="val"><b>ok. 1436</b> · brzeg Duero pod Tordesillas</span></span></button><div class="tip" id="tip-35" role="tooltip"><dl class="facts"><div><dt>Plemię</dt><dd><span class="dot shadow"></span>Władca Cienia</dd></div><div><dt>Patron</dt><dd>Dziadek Grzmot</dd></div><div><dt>Patronat księżycowy</dt><dd><svg class="moon" viewBox="0 0 22 22" width="18" height="18" aria-hidden="true" focusable="false"><circle class="m-shade" cx="11" cy="11" r="9"/><circle class="m-lit" cx="11" cy="11" r="9"/><circle class="m-ring" cx="11" cy="11" r="9"/></svg><span>Ahroun (pełnia)</span></dd></div><div><dt>Wiek</dt><dd>36 lat</dd></div><div><dt>Matka</dt><dd>Urraca de Medina (Zimny Szczyt)</dd></div></dl></div></div></li>
+<li class="node k"><div class="pnode"><button type="button" class="person k" aria-describedby="tip-36" aria-expanded="false"><span class="name kin">Isabel de Córdoba</span><span class="rec"><span class="lab">ur.</span><span class="val"><b>1500</b> · Sierra Morena pod Kordobą</span></span><span class="rec"><span class="lab">zm.</span><span class="val"><b>1558</b> · Kordoba</span></span></button><div class="tip" id="tip-36" role="tooltip"><dl class="facts"><div><dt>Zawód</dt><dd>hodowczyni koni</dd></div><div><dt>Rodzaj</dt><dd>krewna Garou (kinfolk), bez Przemiany</dd></div><div><dt>Wiek</dt><dd>58 lat</dd></div><div><dt>Matka</dt><dd>Beatriz de Medina (Stalowa Nić)</dd></div></dl><p class="note">Tu linie się rozchodzą. Jej córkami są Leonor Barba (linia Barba) i Catalina Granado (linia Granado), rodzone siostry z jednego ojca.</p></div></div></li>
+    </ol>
+
+    <div class="fork" aria-hidden="true"></div>
+
+    <div class="branches">
+      <section class="branch ck" id="linia-cl" aria-labelledby="h-cl">
+        <header class="bhead">
+          <h2 id="h-cl">Linia Granado</h2>
+          <p>Teneryfa, Lanzarote, San Antonio i dolina Rio Grande, aż do Cichych Łap</p>
+        </header>
+        <ol class="chain" aria-label="Linia Granado, od najstarszej do najmłodszej">
+<li class="era"><span class="lbl"><span class="t">Wyspy Kanaryjskie</span><span class="r">1530–1705</span></span></li>
+<li class="node k"><div class="pnode"><button type="button" class="person k" aria-describedby="tip-37" aria-expanded="false"><span class="name kin">Catalina Granado</span><span class="rec"><span class="lab">ur.</span><span class="val"><b>1530</b> · La Orotava (Teneryfa)</span></span><span class="rec"><span class="lab">zm.</span><span class="val"><b>1588</b> · La Laguna (Teneryfa)</span></span></button><div class="tip" id="tip-37" role="tooltip"><dl class="facts"><div><dt>Zawód</dt><dd>dzierżawczyni winnicy</dd></div><div><dt>Rodzaj</dt><dd>krewna Garou (kinfolk), bez Przemiany</dd></div><div><dt>Wiek</dt><dd>58 lat</dd></div><div><dt>Matka</dt><dd>Isabel de Córdoba</dd></div></dl><p class="note">Otwiera linię Granado. Rodzona siostra Leonor Barby.</p></div></div></li>
+<li class="node k"><div class="pnode"><button type="button" class="person k" aria-describedby="tip-38" aria-expanded="false"><span class="name kin">Juana Padrón</span><span class="rec"><span class="lab">ur.</span><span class="val"><b>1555</b> · Güímar (Teneryfa)</span></span><span class="rec"><span class="lab">zm.</span><span class="val"><b>1610</b> · Güímar (Teneryfa)</span></span></button><div class="tip" id="tip-38" role="tooltip"><dl class="facts"><div><dt>Zawód</dt><dd>robotnica rolna w winnicy</dd></div><div><dt>Rodzaj</dt><dd>krewna Garou (kinfolk), bez Przemiany</dd></div><div><dt>Wiek</dt><dd>55 lat</dd></div><div><dt>Matka</dt><dd>Catalina Granado</dd></div></dl></div></div></li>
+<li class="node g"><div class="pnode"><button type="button" class="person g" aria-describedby="tip-39" aria-expanded="false"><span class="name">Wiatr nad Wulkanem</span><span class="civil">Ana Curbelo</span><span class="rec"><span class="lab">ur.</span><span class="val"><b>1580</b> · Las Cañadas pod Teide (Teneryfa)</span></span><span class="rec"><span class="lab">zm.</span><span class="val"><b>1612</b> · lasy laurowe masywu Anaga (Teneryfa)</span></span></button><div class="tip" id="tip-39" role="tooltip"><dl class="facts"><div><dt>Plemię</dt><dd><span class="dot star"></span>Patrzący w Gwiazdy</dd></div><div><dt>Patron</dt><dd>Chimera</dd></div><div><dt>Patronat księżycowy</dt><dd><svg class="moon" viewBox="0 0 22 22" width="18" height="18" aria-hidden="true" focusable="false"><circle class="m-shade" cx="11" cy="11" r="9"/><circle class="m-ring" cx="11" cy="11" r="9"/></svg><span>Ragabash (nów)</span></dd></div><div><dt>Wiek</dt><dd>32 lata</dd></div><div><dt>Matka</dt><dd>Juana Padrón</dd></div></dl></div></div></li>
+<li class="node g"><div class="pnode"><button type="button" class="person g" aria-describedby="tip-40" aria-expanded="false"><span class="name">Popiół na Zboczu</span><span class="civil">Juana Curbelo</span><span class="rec"><span class="lab">ur.</span><span class="val"><b>1605</b> · pola lawy Timanfaya (Lanzarote)</span></span><span class="rec"><span class="lab">zm.</span><span class="val"><b>1637</b> · masyw Famara (Lanzarote)</span></span></button><div class="tip" id="tip-40" role="tooltip"><dl class="facts"><div><dt>Plemię</dt><dd><span class="dot star"></span>Patrzący w Gwiazdy</dd></div><div><dt>Patron</dt><dd>Chimera</dd></div><div><dt>Patronat księżycowy</dt><dd><svg class="moon" viewBox="0 0 22 22" width="18" height="18" aria-hidden="true" focusable="false"><circle class="m-shade" cx="11" cy="11" r="9"/><path class="m-lit" d="M11 2A9 9 0 0 1 11 20A4.5 9 0 0 1 11 2Z"/><circle class="m-ring" cx="11" cy="11" r="9"/></svg><span>Galliard (garb)</span></dd></div><div><dt>Wiek</dt><dd>32 lata</dd></div><div><dt>Matka</dt><dd>Ana Curbelo (Wiatr nad Wulkanem)</dd></div></dl></div></div></li>
+<li class="node g"><div class="pnode"><button type="button" class="person g" aria-describedby="tip-41" aria-expanded="false"><span class="name">Szum Fali</span><span class="civil">Isabel Curbelo</span><span class="rec"><span class="lab">ur.</span><span class="val"><b>1630</b> · klify Los Hervideros (Lanzarote)</span></span><span class="rec"><span class="lab">zm.</span><span class="val"><b>1660</b> · wybrzeże Famara (Lanzarote)</span></span></button><div class="tip" id="tip-41" role="tooltip"><dl class="facts"><div><dt>Plemię</dt><dd><span class="dot strider"></span>Cichy Wędrowiec</dd></div><div><dt>Patron</dt><dd>Sowa</dd></div><div><dt>Patronat księżycowy</dt><dd><svg class="moon" viewBox="0 0 22 22" width="18" height="18" aria-hidden="true" focusable="false"><circle class="m-shade" cx="11" cy="11" r="9"/><circle class="m-ring" cx="11" cy="11" r="9"/></svg><span>Ragabash (nów)</span></dd></div><div><dt>Wiek</dt><dd>30 lat</dd></div><div><dt>Matka</dt><dd>Juana Curbelo (Popiół na Zboczu)</dd></div></dl></div></div></li>
+<li class="node k"><div class="pnode"><button type="button" class="person k" aria-describedby="tip-42" aria-expanded="false"><span class="name kin">Beatriz Arocha</span><span class="rec"><span class="lab">ur.</span><span class="val"><b>1655</b> · Teguise (Lanzarote)</span></span><span class="rec"><span class="lab">zm.</span><span class="val"><b>1710</b> · Teguise (Lanzarote)</span></span></button><div class="tip" id="tip-42" role="tooltip"><dl class="facts"><div><dt>Zawód</dt><dd>zbieraczka porostu orchil na barwnik</dd></div><div><dt>Rodzaj</dt><dd>krewna Garou (kinfolk), bez Przemiany</dd></div><div><dt>Wiek</dt><dd>55 lat</dd></div><div><dt>Matka</dt><dd>Isabel Curbelo (Szum Fali)</dd></div></dl></div></div></li>
+<li class="node k"><div class="pnode"><button type="button" class="person k" aria-describedby="tip-43" aria-expanded="false"><span class="name kin">Ana Cabrera</span><span class="rec"><span class="lab">ur.</span><span class="val"><b>1680</b> · Teguise (Lanzarote)</span></span><span class="rec"><span class="lab">zm.</span><span class="val"><b>1735</b> · Teguise (Lanzarote)</span></span></button><div class="tip" id="tip-43" role="tooltip"><dl class="facts"><div><dt>Zawód</dt><dd>najemna tkaczka wełny</dd></div><div><dt>Rodzaj</dt><dd>krewna Garou (kinfolk), bez Przemiany</dd></div><div><dt>Wiek</dt><dd>55 lat</dd></div><div><dt>Matka</dt><dd>Beatriz Arocha</dd></div></dl></div></div></li>
+<li class="node k"><div class="pnode"><button type="button" class="person k" aria-describedby="tip-44" aria-expanded="false"><span class="name kin">María Leal</span><span class="rec"><span class="lab">ur.</span><span class="val"><b>1705</b> · Teguise (Lanzarote)</span></span><span class="rec"><span class="lab">zm.</span><span class="val"><b>1769</b> · San Antonio de Béxar</span></span></button><div class="tip" id="tip-44" role="tooltip"><dl class="facts"><div><dt>Zawód</dt><dd>bezrolna osadniczka</dd></div><div><dt>Rodzaj</dt><dd>krewna Garou (kinfolk), bez Przemiany</dd></div><div><dt>Wiek</dt><dd>64 lata</dd></div><div><dt>Matka</dt><dd>Ana Cabrera</dd></div></dl><p class="note">Wyjechała do Nowej Hiszpanii ok. 1730. Jej córka urodziła się w drodze.</p></div></div></li>
+<li class="era"><span class="lbl"><span class="t">Teksas</span><span class="r">1730–dziś</span></span></li>
+<li class="node g"><div class="pnode"><button type="button" class="person g" aria-describedby="tip-45" aria-expanded="false"><span class="name">Kurz za Wozem</span><span class="civil">Josefa Cantú</span><span class="rec"><span class="lab">ur.</span><span class="val"><b>1730</b> · pokład okrętu w drodze do Veracruz</span></span><span class="rec"><span class="lab">zm.</span><span class="val"><b>1760</b> · dolina rzeki San Antonio</span></span></button><div class="tip" id="tip-45" role="tooltip"><dl class="facts"><div><dt>Plemię</dt><dd><span class="dot strider"></span>Cichy Wędrowiec</dd></div><div><dt>Patron</dt><dd>Sowa</dd></div><div><dt>Patronat księżycowy</dt><dd><svg class="moon" viewBox="0 0 22 22" width="18" height="18" aria-hidden="true" focusable="false"><circle class="m-shade" cx="11" cy="11" r="9"/><circle class="m-ring" cx="11" cy="11" r="9"/></svg><span>Ragabash (nów)</span></dd></div><div><dt>Wiek</dt><dd>30 lat</dd></div><div><dt>Matka</dt><dd>María Leal</dd></div></dl><p class="note">Urodziła się na pokładzie okrętu, w drodze do Nowej Hiszpanii.</p></div></div></li>
+<li class="node g"><div class="pnode"><button type="button" class="person g" aria-describedby="tip-46" aria-expanded="false"><span class="name">Płonąca Zagroda</span><span class="civil">Ana Cantú</span><span class="rec"><span class="lab">ur.</span><span class="val"><b>1755</b> · San Antonio de Béxar nad rzeką San Antonio</span></span><span class="rec"><span class="lab">zm.</span><span class="val"><b>1786</b> · preria nad rzeką Guadalupe</span></span></button><div class="tip" id="tip-46" role="tooltip"><dl class="facts"><div><dt>Plemię</dt><dd><span class="dot strider"></span>Cichy Wędrowiec</dd></div><div><dt>Patron</dt><dd>Sowa</dd></div><div><dt>Patronat księżycowy</dt><dd><svg class="moon" viewBox="0 0 22 22" width="18" height="18" aria-hidden="true" focusable="false"><circle class="m-shade" cx="11" cy="11" r="9"/><circle class="m-lit" cx="11" cy="11" r="9"/><circle class="m-ring" cx="11" cy="11" r="9"/></svg><span>Ahroun (pełnia)</span></dd></div><div><dt>Wiek</dt><dd>31 lat</dd></div><div><dt>Matka</dt><dd>Josefa Cantú (Kurz za Wozem)</dd></div></dl></div></div></li>
+<li class="node k"><div class="pnode"><button type="button" class="person k" aria-describedby="tip-47" aria-expanded="false"><span class="name kin">Rosa Cavazos</span><span class="rec"><span class="lab">ur.</span><span class="val"><b>1780</b> · dolina Rio Grande pod Camargo</span></span><span class="rec"><span class="lab">zm.</span><span class="val"><b>1840</b> · dolina Rio Grande pod Camargo</span></span></button><div class="tip" id="tip-47" role="tooltip"><dl class="facts"><div><dt>Zawód</dt><dd>najemna pasterka owiec</dd></div><div><dt>Rodzaj</dt><dd>krewna Garou (kinfolk), bez Przemiany</dd></div><div><dt>Wiek</dt><dd>60 lat</dd></div><div><dt>Matka</dt><dd>Ana Cantú (Płonąca Zagroda)</dd></div></dl></div></div></li>
+<li class="node k"><div class="pnode"><button type="button" class="person k" aria-describedby="tip-48" aria-expanded="false"><span class="name kin">Guadalupe Delgado</span><span class="rec"><span class="lab">ur.</span><span class="val"><b>1805</b> · rzeka Medina pod San Antonio</span></span><span class="rec"><span class="lab">zm.</span><span class="val"><b>1868</b> · rzeka Medina pod San Antonio</span></span></button><div class="tip" id="tip-48" role="tooltip"><dl class="facts"><div><dt>Zawód</dt><dd>kucharka na cudzym ranczu</dd></div><div><dt>Rodzaj</dt><dd>krewna Garou (kinfolk), bez Przemiany</dd></div><div><dt>Wiek</dt><dd>63 lata</dd></div><div><dt>Matka</dt><dd>Rosa Cavazos</dd></div></dl></div></div></li>
+<li class="node k"><div class="pnode"><button type="button" class="person k" aria-describedby="tip-49" aria-expanded="false"><span class="name kin">Dolores Garza</span><span class="rec"><span class="lab">ur.</span><span class="val"><b>1830</b> · dolina rzeki Nueces</span></span><span class="rec"><span class="lab">zm.</span><span class="val"><b>1894</b> · dolina rzeki Nueces</span></span></button><div class="tip" id="tip-49" role="tooltip"><dl class="facts"><div><dt>Zawód</dt><dd>praczka i akuszerka</dd></div><div><dt>Rodzaj</dt><dd>krewna Garou (kinfolk), bez Przemiany</dd></div><div><dt>Wiek</dt><dd>64 lata</dd></div><div><dt>Matka</dt><dd>Guadalupe Delgado</dd></div></dl></div></div></li>
+<li class="node g"><div class="pnode"><button type="button" class="person g" aria-describedby="tip-50" aria-expanded="false"><span class="name">Kwiat Opuncji</span><span class="civil">Concepción Flores</span><span class="rec"><span class="lab">ur.</span><span class="val"><b>1860</b> · Corpus Christi (u ujścia rzeki Nueces)</span></span><span class="rec"><span class="lab">zm.</span><span class="val"><b>1895</b> · okolice rzeki Nueces</span></span></button><div class="tip" id="tip-50" role="tooltip"><dl class="facts"><div><dt>Plemię</dt><dd><span class="dot gnawer"></span>Gnatożuj</dd></div><div><dt>Patron</dt><dd>Szczur</dd></div><div><dt>Patronat księżycowy</dt><dd><svg class="moon" viewBox="0 0 22 22" width="18" height="18" aria-hidden="true" focusable="false"><circle class="m-shade" cx="11" cy="11" r="9"/><circle class="m-ring" cx="11" cy="11" r="9"/></svg><span>Ragabash (nów)</span></dd></div><div><dt>Wiek</dt><dd>35 lat</dd></div><div><dt>Matka</dt><dd>Dolores Garza</dd></div></dl></div></div></li>
+<li class="node g"><div class="pnode"><button type="button" class="person g" aria-describedby="tip-51" aria-expanded="false"><span class="name">Cierń na Wietrze</span><span class="civil">Josefa Flores</span><span class="rec"><span class="lab">ur.</span><span class="val"><b>1890</b> · Rio Grande City nad Rio Grande</span></span><span class="rec"><span class="lab">zm.</span><span class="val"><b>1920</b> · Rio Grande Valley koło Harlingen</span></span></button><div class="tip" id="tip-51" role="tooltip"><dl class="facts"><div><dt>Plemię</dt><dd><span class="dot gnawer"></span>Gnatożuj</dd></div><div><dt>Patron</dt><dd>Szczur</dd></div><div><dt>Patronat księżycowy</dt><dd><svg class="moon" viewBox="0 0 22 22" width="18" height="18" aria-hidden="true" focusable="false"><circle class="m-shade" cx="11" cy="11" r="9"/><circle class="m-ring" cx="11" cy="11" r="9"/></svg><span>Ragabash (nów)</span></dd></div><div><dt>Wiek</dt><dd>30 lat</dd></div><div><dt>Matka</dt><dd>Concepción Flores (Kwiat Opuncji)</dd></div></dl><p class="note">Zmarła, gdy jej córka Elena miała 5 lat.</p></div></div></li>
+<li class="node k"><div class="pnode"><button type="button" class="person k" aria-describedby="tip-52" aria-expanded="false"><span class="name kin">Elena Ochoa</span><span class="rec"><span class="lab">ur.</span><span class="val"><b>1915</b> · Mission (Rio Grande Valley)</span></span><span class="rec"><span class="lab">zm.</span><span class="val"><b>1991</b> · Mission (Rio Grande Valley)</span></span></button><div class="tip" id="tip-52" role="tooltip"><dl class="facts"><div><dt>Zawód</dt><dd>pracownica sezonowa przy zbiorach cytrusów</dd></div><div><dt>Rodzaj</dt><dd>krewna Garou (kinfolk), bez Przemiany</dd></div><div><dt>Wiek</dt><dd>76 lat</dd></div><div><dt>Matka</dt><dd>Josefa Flores (Cierń na Wietrze)</dd></div></dl></div></div></li>
+<li class="node k"><div class="pnode"><button type="button" class="person k" aria-describedby="tip-53" aria-expanded="false"><span class="name kin">Rosario Salinas</span><span class="rec"><span class="lab">ur.</span><span class="val"><b>1942</b> · Edinburg (Teksas)</span></span><span class="rec"><span class="lab">zm.</span><span class="val"><b>2021</b> · Edinburg (Teksas)</span></span></button><div class="tip" id="tip-53" role="tooltip"><dl class="facts"><div><dt>Zawód</dt><dd>pracownica pakowalni warzyw</dd></div><div><dt>Rodzaj</dt><dd>krewna Garou (kinfolk), bez Przemiany</dd></div><div><dt>Wiek</dt><dd>79 lat</dd></div><div><dt>Matka</dt><dd>Elena Ochoa</dd></div></dl></div></div></li>
+<li class="node k"><div class="pnode"><button type="button" class="person k" aria-describedby="tip-54" aria-expanded="false"><span class="name kin">Maribel Vela</span><span class="rec"><span class="lab">ur.</span><span class="val"><b>1968</b> · Brownsville (Teksas)</span></span><span class="rec"><span class="lab">zm.</span><span class="val"><b>żyje</b></span></span></button><div class="tip" id="tip-54" role="tooltip"><dl class="facts"><div><dt>Zawód</dt><dd>robotnica w fabryce odzieży</dd></div><div><dt>Rodzaj</dt><dd>krewna Garou (kinfolk), bez Przemiany</dd></div><div><dt>Wiek</dt><dd>58 lat (w 2026 r.)</dd></div><div><dt>Matka</dt><dd>Rosario Salinas</dd></div></dl><p class="note">Matka Ciche Łapy.</p></div></div></li>
+<li class="node g"><div class="pnode"><button type="button" class="person g now" aria-describedby="tip-55" aria-expanded="false"><span class="name">Ciche Łapy</span><span class="rec"><span class="lab">ur.</span><span class="val"><b>ok. 2002</b> · Brownsville</span></span><span class="rec"><span class="lab">zm.</span><span class="val"><b>żyje</b></span></span></button><div class="tip" id="tip-55" role="tooltip"><dl class="facts"><div><dt>Plemię</dt><dd><span class="dot strider"></span>Cichy Wędrowiec</dd></div><div><dt>Patron</dt><dd>Sowa</dd></div><div><dt>Patronat księżycowy</dt><dd><svg class="moon" viewBox="0 0 22 22" width="18" height="18" aria-hidden="true" focusable="false"><circle class="m-shade" cx="11" cy="11" r="9"/><circle class="m-ring" cx="11" cy="11" r="9"/></svg><span>Ragabash (nów)</span></dd></div><div><dt>Wiek</dt><dd>24 lata (w 2026 r.)</dd></div><div><dt>Matka</dt><dd>Maribel Vela</dd></div></dl><p class="note">Nazwisko Gálvez po ojcu.</p></div></div></li>
+        </ol>
+      </section>
+
+      <section class="branch lilly" id="linia-lilly" aria-labelledby="h-lilly">
+        <header class="bhead">
+          <h2 id="h-lilly">Linia Barba</h2>
+          <p>Sewilla, Nowa Hiszpania, Sonora i wybrzeże Pacyfiku, aż do Lilly</p>
+        </header>
+        <ol class="chain" aria-label="Linia Barba, od najstarszej do najmłodszej">
+<li class="era"><span class="lbl"><span class="t">Sewilla i Nowa Hiszpania</span><span class="r">1525–1650</span></span></li>
+<li class="node k"><div class="pnode"><button type="button" class="person k" aria-describedby="tip-56" aria-expanded="false"><span class="name kin">Leonor Barba</span><span class="rec"><span class="lab">ur.</span><span class="val"><b>1525</b> · Carmona koło Sewilli</span></span><span class="rec"><span class="lab">zm.</span><span class="val"><b>1583</b> · Sewilla</span></span></button><div class="tip" id="tip-56" role="tooltip"><dl class="facts"><div><dt>Zawód</dt><dd>właścicielka winnicy i oliwiarni</dd></div><div><dt>Rodzaj</dt><dd>krewna Garou (kinfolk), bez Przemiany</dd></div><div><dt>Wiek</dt><dd>58 lat</dd></div><div><dt>Matka</dt><dd>Isabel de Córdoba</dd></div></dl><p class="note">Otwiera linię Barba. Rodzona siostra Catalina Granado.</p></div></div></li>
+<li class="node g"><div class="pnode"><button type="button" class="person g" aria-describedby="tip-57" aria-expanded="false"><span class="name">Sól na Wodzie</span><span class="civil">Inés Salazar</span><span class="rec"><span class="lab">ur.</span><span class="val"><b>1550</b> · Triana nad Gwadalkiwirem w Sewilli</span></span><span class="rec"><span class="lab">zm.</span><span class="val"><b>1580</b> · wybrzeże Zatoki Meksykańskiej pod Veracruz</span></span></button><div class="tip" id="tip-57" role="tooltip"><dl class="facts"><div><dt>Plemię</dt><dd><span class="dot shadow"></span>Władca Cienia</dd></div><div><dt>Patron</dt><dd>Dziadek Grzmot</dd></div><div><dt>Patronat księżycowy</dt><dd><svg class="moon" viewBox="0 0 22 22" width="18" height="18" aria-hidden="true" focusable="false"><circle class="m-shade" cx="11" cy="11" r="9"/><path class="m-lit" d="M11 2A9 9 0 0 1 11 20L11 2Z"/><circle class="m-ring" cx="11" cy="11" r="9"/></svg><span>Filodoks (półksiężyc)</span></dd></div><div><dt>Wiek</dt><dd>30 lat</dd></div><div><dt>Matka</dt><dd>Leonor Barba</dd></div></dl><p class="note">Przeprawiła się z Sewilli do Nowej Hiszpanii. Jej córka urodziła się już nad jeziorem Texcoco.</p></div></div></li>
+<li class="node g"><div class="pnode"><button type="button" class="person g" aria-describedby="tip-58" aria-expanded="false"><span class="name">Fala w Skale</span><span class="civil">Catalina Salazar</span><span class="rec"><span class="lab">ur.</span><span class="val"><b>1575</b> · brzeg jeziora Texcoco</span></span><span class="rec"><span class="lab">zm.</span><span class="val"><b>1606</b> · stoki Popocatépetl</span></span></button><div class="tip" id="tip-58" role="tooltip"><dl class="facts"><div><dt>Plemię</dt><dd><span class="dot shadow"></span>Władca Cienia</dd></div><div><dt>Patron</dt><dd>Dziadek Grzmot</dd></div><div><dt>Patronat księżycowy</dt><dd><svg class="moon" viewBox="0 0 22 22" width="18" height="18" aria-hidden="true" focusable="false"><circle class="m-shade" cx="11" cy="11" r="9"/><path class="m-lit" d="M11 2A9 9 0 0 1 11 20A4.5 9 0 0 0 11 2Z"/><circle class="m-ring" cx="11" cy="11" r="9"/></svg><span>Teurg (sierp)</span></dd></div><div><dt>Wiek</dt><dd>31 lat</dd></div><div><dt>Matka</dt><dd>Inés Salazar (Sól na Wodzie)</dd></div></dl></div></div></li>
+<li class="node k"><div class="pnode"><button type="button" class="person k" aria-describedby="tip-59" aria-expanded="false"><span class="name kin">Magdalena Pacheco</span><span class="rec"><span class="lab">ur.</span><span class="val"><b>1600</b> · Durango</span></span><span class="rec"><span class="lab">zm.</span><span class="val"><b>1661</b> · Durango</span></span></button><div class="tip" id="tip-59" role="tooltip"><dl class="facts"><div><dt>Zawód</dt><dd>udziałowiec kopalni srebra</dd></div><div><dt>Rodzaj</dt><dd>krewna Garou (kinfolk), bez Przemiany</dd></div><div><dt>Wiek</dt><dd>61 lat</dd></div><div><dt>Matka</dt><dd>Catalina Salazar (Fala w Skale)</dd></div></dl></div></div></li>
+<li class="node k"><div class="pnode"><button type="button" class="person k" aria-describedby="tip-60" aria-expanded="false"><span class="name kin">Ana Aguirre</span><span class="rec"><span class="lab">ur.</span><span class="val"><b>1625</b> · dolina rzeki Fuerte (Sinaloa)</span></span><span class="rec"><span class="lab">zm.</span><span class="val"><b>1688</b> · dolina rzeki Fuerte (Sinaloa)</span></span></button><div class="tip" id="tip-60" role="tooltip"><dl class="facts"><div><dt>Zawód</dt><dd>właścicielka hacjendy</dd></div><div><dt>Rodzaj</dt><dd>krewna Garou (kinfolk), bez Przemiany</dd></div><div><dt>Wiek</dt><dd>63 lata</dd></div><div><dt>Matka</dt><dd>Magdalena Pacheco</dd></div></dl></div></div></li>
+<li class="node k"><div class="pnode"><button type="button" class="person k" aria-describedby="tip-61" aria-expanded="false"><span class="name kin">Lucía Marrón</span><span class="rec"><span class="lab">ur.</span><span class="val"><b>1650</b> · dolina rzeki Culiacán (Sinaloa)</span></span><span class="rec"><span class="lab">zm.</span><span class="val"><b>1712</b> · dolina rzeki Culiacán (Sinaloa)</span></span></button><div class="tip" id="tip-61" role="tooltip"><dl class="facts"><div><dt>Zawód</dt><dd>kupcowa handlująca bawełną i solą</dd></div><div><dt>Rodzaj</dt><dd>krewna Garou (kinfolk), bez Przemiany</dd></div><div><dt>Wiek</dt><dd>62 lata</dd></div><div><dt>Matka</dt><dd>Ana Aguirre</dd></div></dl></div></div></li>
+<li class="era"><span class="lbl"><span class="t">Sonora i Baja California</span><span class="r">1675–1750</span></span></li>
+<li class="node g"><div class="pnode"><button type="button" class="person g" aria-describedby="tip-62" aria-expanded="false"><span class="name">Skała Wśród Piasku</span><span class="civil">Petra Serrano</span><span class="rec"><span class="lab">ur.</span><span class="val"><b>1675</b> · pustynia Sonora pod Altar</span></span><span class="rec"><span class="lab">zm.</span><span class="val"><b>1706</b> · dolina rzeki Altar</span></span></button><div class="tip" id="tip-62" role="tooltip"><dl class="facts"><div><dt>Plemię</dt><dd><span class="dot fury"></span>Czarna Furia</dd></div><div><dt>Patron</dt><dd>Pegaz</dd></div><div><dt>Patronat księżycowy</dt><dd><svg class="moon" viewBox="0 0 22 22" width="18" height="18" aria-hidden="true" focusable="false"><circle class="m-shade" cx="11" cy="11" r="9"/><circle class="m-lit" cx="11" cy="11" r="9"/><circle class="m-ring" cx="11" cy="11" r="9"/></svg><span>Ahroun (pełnia)</span></dd></div><div><dt>Wiek</dt><dd>31 lat</dd></div><div><dt>Matka</dt><dd>Lucía Marrón</dd></div></dl></div></div></li>
+<li class="node g"><div class="pnode"><button type="button" class="person g" aria-describedby="tip-63" aria-expanded="false"><span class="name">Cień Mulic</span><span class="civil">Rosalía Serrano</span><span class="rec"><span class="lab">ur.</span><span class="val"><b>1700</b> · dolina rzeki San Miguel (Sonora)</span></span><span class="rec"><span class="lab">zm.</span><span class="val"><b>1730</b> · szlak mułów koło Cananea</span></span></button><div class="tip" id="tip-63" role="tooltip"><dl class="facts"><div><dt>Plemię</dt><dd><span class="dot fury"></span>Czarna Furia</dd></div><div><dt>Patron</dt><dd>Pegaz</dd></div><div><dt>Patronat księżycowy</dt><dd><svg class="moon" viewBox="0 0 22 22" width="18" height="18" aria-hidden="true" focusable="false"><circle class="m-shade" cx="11" cy="11" r="9"/><circle class="m-ring" cx="11" cy="11" r="9"/></svg><span>Ragabash (nów)</span></dd></div><div><dt>Wiek</dt><dd>30 lat</dd></div><div><dt>Matka</dt><dd>Petra Serrano (Skała Wśród Piasku)</dd></div></dl></div></div></li>
+<li class="node k"><div class="pnode"><button type="button" class="person k" aria-describedby="tip-64" aria-expanded="false"><span class="name kin">María Acuña</span><span class="rec"><span class="lab">ur.</span><span class="val"><b>1725</b> · Sonora</span></span><span class="rec"><span class="lab">zm.</span><span class="val"><b>1790</b> · Sonora</span></span></button><div class="tip" id="tip-64" role="tooltip"><dl class="facts"><div><dt>Zawód</dt><dd>właścicielka składu towarów przy presidio</dd></div><div><dt>Rodzaj</dt><dd>krewna Garou (kinfolk), bez Przemiany</dd></div><div><dt>Wiek</dt><dd>65 lat</dd></div><div><dt>Matka</dt><dd>Rosalía Serrano (Cień Mulic)</dd></div></dl></div></div></li>
+<li class="node k"><div class="pnode"><button type="button" class="person k" aria-describedby="tip-65" aria-expanded="false"><span class="name kin">Concepción Ybarra</span><span class="rec"><span class="lab">ur.</span><span class="val"><b>1750</b> · wybrzeże pod Loreto (Baja California)</span></span><span class="rec"><span class="lab">zm.</span><span class="val"><b>1812</b> · Loreto (Baja California)</span></span></button><div class="tip" id="tip-65" role="tooltip"><dl class="facts"><div><dt>Zawód</dt><dd>armatorka łodzi perłowych</dd></div><div><dt>Rodzaj</dt><dd>krewna Garou (kinfolk), bez Przemiany</dd></div><div><dt>Wiek</dt><dd>62 lata</dd></div><div><dt>Matka</dt><dd>María Acuña</dd></div></dl></div></div></li>
+<li class="era"><span class="lbl"><span class="t">San Diego i Tijuana</span><span class="r">1775–dziś</span></span></li>
+<li class="node g"><div class="pnode"><button type="button" class="person g" aria-describedby="tip-66" aria-expanded="false"><span class="name">Mgła nad Zatoką</span><span class="civil">Manuela Alvarado</span><span class="rec"><span class="lab">ur.</span><span class="val"><b>1775</b> · Presidio San Diego (dziś Old Town w San Diego)</span></span><span class="rec"><span class="lab">zm.</span><span class="val"><b>1805</b> · wzgórza Point Loma</span></span></button><div class="tip" id="tip-66" role="tooltip"><dl class="facts"><div><dt>Plemię</dt><dd><span class="dot shadow"></span>Władca Cienia</dd></div><div><dt>Patron</dt><dd>Dziadek Grzmot</dd></div><div><dt>Patronat księżycowy</dt><dd><svg class="moon" viewBox="0 0 22 22" width="18" height="18" aria-hidden="true" focusable="false"><circle class="m-shade" cx="11" cy="11" r="9"/><path class="m-lit" d="M11 2A9 9 0 0 1 11 20A4.5 9 0 0 0 11 2Z"/><circle class="m-ring" cx="11" cy="11" r="9"/></svg><span>Teurg (sierp)</span></dd></div><div><dt>Wiek</dt><dd>30 lat</dd></div><div><dt>Matka</dt><dd>Concepción Ybarra</dd></div></dl></div></div></li>
+<li class="node g"><div class="pnode"><button type="button" class="person g" aria-describedby="tip-67" aria-expanded="false"><span class="name">Szary Przypływ</span><span class="civil">Dolores Alvarado</span><span class="rec"><span class="lab">ur.</span><span class="val"><b>1800</b> · San Diego, przy misji San Diego de Alcalá</span></span><span class="rec"><span class="lab">zm.</span><span class="val"><b>1835</b> · estuarium rzeki San Diego</span></span></button><div class="tip" id="tip-67" role="tooltip"><dl class="facts"><div><dt>Plemię</dt><dd><span class="dot fury"></span>Czarna Furia</dd></div><div><dt>Patron</dt><dd>Pegaz</dd></div><div><dt>Patronat księżycowy</dt><dd><svg class="moon" viewBox="0 0 22 22" width="18" height="18" aria-hidden="true" focusable="false"><circle class="m-shade" cx="11" cy="11" r="9"/><path class="m-lit" d="M11 2A9 9 0 0 1 11 20A4.5 9 0 0 1 11 2Z"/><circle class="m-ring" cx="11" cy="11" r="9"/></svg><span>Galliard (garb)</span></dd></div><div><dt>Wiek</dt><dd>35 lat</dd></div><div><dt>Matka</dt><dd>Manuela Alvarado (Mgła nad Zatoką)</dd></div></dl></div></div></li>
+<li class="node k"><div class="pnode"><button type="button" class="person k" aria-describedby="tip-68" aria-expanded="false"><span class="name kin">Josefa Rodríguez</span><span class="rec"><span class="lab">ur.</span><span class="val"><b>1830</b> · Mission Valley (San Diego)</span></span><span class="rec"><span class="lab">zm.</span><span class="val"><b>1897</b> · Mission Valley (San Diego)</span></span></button><div class="tip" id="tip-68" role="tooltip"><dl class="facts"><div><dt>Zawód</dt><dd>właścicielka rancza i dzierżawczyni ziemi</dd></div><div><dt>Rodzaj</dt><dd>krewna Garou (kinfolk), bez Przemiany</dd></div><div><dt>Wiek</dt><dd>67 lat</dd></div><div><dt>Matka</dt><dd>Dolores Alvarado (Szary Przypływ)</dd></div></dl></div></div></li>
+<li class="node k"><div class="pnode"><button type="button" class="person k" aria-describedby="tip-69" aria-expanded="false"><span class="name kin">Trinidad Soto</span><span class="rec"><span class="lab">ur.</span><span class="val"><b>1860</b> · San Diego</span></span><span class="rec"><span class="lab">zm.</span><span class="val"><b>1930</b> · San Diego</span></span></button><div class="tip" id="tip-69" role="tooltip"><dl class="facts"><div><dt>Zawód</dt><dd>właścicielka hotelu</dd></div><div><dt>Rodzaj</dt><dd>krewna Garou (kinfolk), bez Przemiany</dd></div><div><dt>Wiek</dt><dd>70 lat</dd></div><div><dt>Matka</dt><dd>Josefa Rodríguez</dd></div></dl></div></div></li>
+<li class="node k"><div class="pnode"><button type="button" class="person k" aria-describedby="tip-70" aria-expanded="false"><span class="name kin">Carmen Leyva</span><span class="rec"><span class="lab">ur.</span><span class="val"><b>1890</b> · dolina rzeki Tijuana</span></span><span class="rec"><span class="lab">zm.</span><span class="val"><b>1962</b> · Tijuana</span></span></button><div class="tip" id="tip-70" role="tooltip"><dl class="facts"><div><dt>Zawód</dt><dd>importerka i hurtowniczka owoców</dd></div><div><dt>Rodzaj</dt><dd>krewna Garou (kinfolk), bez Przemiany</dd></div><div><dt>Wiek</dt><dd>72 lata</dd></div><div><dt>Matka</dt><dd>Trinidad Soto</dd></div></dl></div></div></li>
+<li class="node g"><div class="pnode"><button type="button" class="person g" aria-describedby="tip-71" aria-expanded="false"><span class="name">Światło Granicy</span><span class="civil">Luz Beltrán</span><span class="rec"><span class="lab">ur.</span><span class="val"><b>1915</b> · Ensenada</span></span><span class="rec"><span class="lab">zm.</span><span class="val"><b>1948</b> · wybrzeże Pacyfiku pod Rosarito</span></span></button><div class="tip" id="tip-71" role="tooltip"><dl class="facts"><div><dt>Plemię</dt><dd><span class="dot fury"></span>Czarna Furia</dd></div><div><dt>Patron</dt><dd>Pegaz</dd></div><div><dt>Patronat księżycowy</dt><dd><svg class="moon" viewBox="0 0 22 22" width="18" height="18" aria-hidden="true" focusable="false"><circle class="m-shade" cx="11" cy="11" r="9"/><path class="m-lit" d="M11 2A9 9 0 0 1 11 20L11 2Z"/><circle class="m-ring" cx="11" cy="11" r="9"/></svg><span>Filodoks (półksiężyc)</span></dd></div><div><dt>Wiek</dt><dd>33 lata</dd></div><div><dt>Matka</dt><dd>Carmen Leyva</dd></div></dl></div></div></li>
+<li class="node g"><div class="pnode"><button type="button" class="person g" aria-describedby="tip-72" aria-expanded="false"><span class="name">Cień na Murze</span><span class="civil">Alicia Beltrán</span><span class="rec"><span class="lab">ur.</span><span class="val"><b>1942</b> · San Diego (Golden Hill, przy Balboa Park)</span></span><span class="rec"><span class="lab">zm.</span><span class="val"><b>1983</b> · kanion Los Peñasquitos</span></span></button><div class="tip" id="tip-72" role="tooltip"><dl class="facts"><div><dt>Plemię</dt><dd><span class="dot fenris"></span>Potomek Fenrisa</dd></div><div><dt>Patron</dt><dd>Fenris</dd></div><div><dt>Patronat księżycowy</dt><dd><svg class="moon" viewBox="0 0 22 22" width="18" height="18" aria-hidden="true" focusable="false"><circle class="m-shade" cx="11" cy="11" r="9"/><circle class="m-lit" cx="11" cy="11" r="9"/><circle class="m-ring" cx="11" cy="11" r="9"/></svg><span>Ahroun (pełnia)</span></dd></div><div><dt>Wiek</dt><dd>41 lat</dd></div><div><dt>Matka</dt><dd>Luz Beltrán (Światło Granicy)</dd></div></dl><p class="note">Zmarła, gdy jej córka Rosa miała 15 lat.</p></div></div></li>
+<li class="node k"><div class="pnode"><button type="button" class="person k" aria-describedby="tip-73" aria-expanded="false"><span class="name kin">Rosa Ramírez</span><span class="rec"><span class="lab">ur.</span><span class="val"><b>1968</b> · Barrio Logan (San Diego)</span></span><span class="rec"><span class="lab">zm.</span><span class="val"><b>żyje</b></span></span></button><div class="tip" id="tip-73" role="tooltip"><dl class="facts"><div><dt>Zawód</dt><dd>właścicielka sieci restauracji meksykańskich</dd></div><div><dt>Rodzaj</dt><dd>krewna Garou (kinfolk), bez Przemiany</dd></div><div><dt>Wiek</dt><dd>58 lat (w 2026 r.)</dd></div><div><dt>Matka</dt><dd>Alicia Beltrán (Cień na Murze)</dd></div></dl><p class="note">Matka Lilly.</p></div></div></li>
+<li class="node g"><div class="pnode"><button type="button" class="person g now" aria-describedby="tip-74" aria-expanded="false"><span class="name">Krocząca we Mgle</span><span class="civil">Lilly Terrance, dawniej Isabella Velasquez</span><span class="rec"><span class="lab">ur.</span><span class="val"><b>ok. 1995</b> · La Jolla (San Diego)</span></span><span class="rec"><span class="lab">zm.</span><span class="val"><b>żyje</b></span></span></button><div class="tip" id="tip-74" role="tooltip"><dl class="facts"><div><dt>Plemię</dt><dd><span class="dot shadow"></span>Władca Cienia</dd></div><div><dt>Patron</dt><dd>Dziadek Grzmot</dd></div><div><dt>Patronat księżycowy</dt><dd><svg class="moon" viewBox="0 0 22 22" width="18" height="18" aria-hidden="true" focusable="false"><circle class="m-shade" cx="11" cy="11" r="9"/><path class="m-lit" d="M11 2A9 9 0 0 1 11 20L11 2Z"/><circle class="m-ring" cx="11" cy="11" r="9"/></svg><span>Filodoks (półksiężyc)</span></dd></div><div><dt>Wiek</dt><dd>31 lat (w 2026 r.)</dd></div><div><dt>Matka</dt><dd>Rosa Ramírez</dd></div></dl><p class="note">Dawne nazwisko Velasquez odziedziczyła po ojcu.</p></div></div></li>
+        </ol>
+      </section>
+    </div>
+  </main>
+
+  <footer class="foot">
+    <p>Daty sprzed 1500 roku są przybliżone.</p>
+    <p>Leonor Barba i Catalina Granado, początki obu linii, były rodzonymi siostrami, córkami Isabel de Córdoba i tego samego ojca.</p>
+  </footer>
+</div>
+
+<script>
+(function () {
+  var tree = document.querySelector('.tree');
+  if (!tree) return;
+  tree.removeAttribute('data-show');
+  var open = null, cur = null;
+
+  function place(node) {
+    var tip = node.querySelector('.tip');
+    if (!tip) return;
+    node.classList.remove('up');
+    tip.style.setProperty('--shift', '0px');
+    var vw = document.documentElement.clientWidth, vh = window.innerHeight, m = 12;
+    var r = tip.getBoundingClientRect(), n = node.getBoundingClientRect(), shift = 0;
+    if (r.left < m) shift = m - r.left;
+    else if (r.right > vw - m) shift = vw - m - r.right;
+    tip.style.setProperty('--shift', shift + 'px');
+    var below = vh - n.bottom, above = n.top;
+    if (r.height + 16 > below && above > below) node.classList.add('up');
+  }
+  function setOpen(node, on) {
+    node.classList.toggle('open', on);
+    var b = node.querySelector('.person');
+    if (b) b.setAttribute('aria-expanded', on ? 'true' : 'false');
+  }
+  function closeAll() {
+    if (open) { setOpen(open, false); open = null; }
+  }
+
+  tree.addEventListener('click', function (ev) {
+    var b = ev.target.closest('.person');
+    if (!b) return;
+    var node = b.closest('.pnode');
+    if (open === node) { closeAll(); return; }
+    closeAll();
+    node.classList.remove('hush');
+    place(node);
+    setOpen(node, true);
+    open = node;
+  });
+  document.addEventListener('click', function (ev) {
+    if (ev.target.closest('.pnode')) return;
+    closeAll();
+  });
+
+  tree.addEventListener('mouseover', function (ev) {
+    var node = ev.target.closest('.pnode');
+    if (!node || node === cur) return;
+    cur = node;
+    if (open && open !== node) closeAll();
+    place(node);
+  });
+  tree.addEventListener('mouseout', function (ev) {
+    var node = ev.target.closest('.pnode');
+    if (!node) return;
+    if (ev.relatedTarget && node.contains(ev.relatedTarget)) return;
+    node.classList.remove('hush');
+    if (cur === node) cur = null;
+  });
+  tree.addEventListener('focusin', function (ev) {
+    var node = ev.target.closest('.pnode');
+    if (node) { cur = node; place(node); }
+  });
+  tree.addEventListener('focusout', function (ev) {
+    var node = ev.target.closest('.pnode');
+    if (node && !(ev.relatedTarget && node.contains(ev.relatedTarget))) node.classList.remove('hush');
+  });
+  document.addEventListener('keydown', function (ev) {
+    if (ev.key !== 'Escape') return;
+    var a = document.activeElement;
+    var was = open || cur || (a && a.closest ? a.closest('.pnode') : null);
+    closeAll();
+    if (was) was.classList.add('hush');
+  });
+  window.addEventListener('resize', function () { if (open) place(open); });
+
+  var chips = document.querySelectorAll('.chips button');
+  Array.prototype.forEach.call(chips, function (c) {
+    c.addEventListener('click', function () {
+      var f = c.getAttribute('data-f');
+      if (f === 'all') tree.removeAttribute('data-show'); else tree.setAttribute('data-show', f);
+      Array.prototype.forEach.call(chips, function (x) {
+        x.setAttribute('aria-pressed', x === c ? 'true' : 'false');
+      });
+    });
+  });
+})();
+</script>
+
+</body>
+</html>
